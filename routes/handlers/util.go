@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -12,15 +13,15 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/models"
 )
 
 func parseIdFromURL(r *http.Request, message string) (string, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return "", fmt.Errorf(message)
+		return "", errors.New(message)
 	}
 	return id, nil
 }
@@ -196,6 +197,7 @@ func fetchReservationDetails(
 		FROM events e
 		JOIN reservation_statuses rs ON rs.name = $2
 		WHERE e.id = $1
+		FOR UPDATE OF e
 	`
 	var basePrice float64
 	var availableTickets int
@@ -531,4 +533,15 @@ func isDuplicateExcept(
 		return http.StatusOK, nil
 	}
 	return http.StatusInternalServerError, fmt.Errorf("Failed to check for duplicate username.")
+}
+
+// Verify if currently logged in user owns the given reservation.
+func isReservationOwner(r *http.Request, pool *pgxpool.Pool, reservationID string) bool {
+	var ownerID string
+	err := pool.QueryRow(
+		r.Context(),
+		"SELECT user_id FROM Reservations WHERE id = $1",
+		reservationID,
+	).Scan(&ownerID)
+	return err == nil && isOwner(r, ownerID)
 }

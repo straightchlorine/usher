@@ -8,8 +8,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/models"
 )
 
 // Login handler facilitates the login process.

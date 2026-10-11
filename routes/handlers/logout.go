@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/models"
 )
 
 // Logout handler facilitates the logout process.
