@@ -1,20 +1,13 @@
-networks:
-  event-network:
-    name: event-network
-    driver: bridge
 services:
   db:
     image: postgres
-    networks:
-      - event-network
-    restart: always
     container_name: postgres
     hostname: ${DB_HOST:-database}
+    restart: always
+    networks:
+      - event-network
     ports:
       - "${DB_PORT:-5432}:${DB_PORT:-5432}"
-    volumes:
-      # - db-data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       PGUSER: ${DB_USER:-postgres}
@@ -23,36 +16,43 @@ services:
       NC_USER: ${NC_DB_USER:-nocodb}
       NC_PASSWORD: ${NC_DB_PASSWORD:-password}
       NC_NAME: ${NC_DB_NAME:-nocodb_metadata}
+    volumes:
+      # - db-data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ['CMD-SHELL', "pg_isready", "-U ${DB_USER:-postgres}", "-d ${DB_NAME:-event_api}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-event_api}"]
       interval: 5s
       timeout: 3s
       start_period: 5s
       retries: 5
+
   nocodb:
     image: nocodb/nocodb
+    container_name: nocodb-dashboard
+    restart: always
     networks:
       - event-network
-    container_name: nocodb-dashboard
     ports:
       - "${NC_DB_PORT:-8081}:${NC_DB_PORT:-8081}"
     environment:
       - NC_DB=pg://${DB_HOST:-database}:${DB_PORT:-5432}?u=${NC_DB_USER:-nocodb}&p=${NC_DB_PASSWORD:-password}&d=${NC_DB_NAME:-nocodb_metadata}
       - NC_AUTH_JWT_SECRET=${NC_AUTH_JWT:-569a1821-0a93-45e8-87ab-eb857f20a010}
       - PORT=${NC_DB_PORT:-8081}
-    restart: always
     depends_on:
       db:
         condition: service_healthy
         restart: true
+
   event-api:
-    container_name: event-api
-    networks:
-      - event-network
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: event-api
     restart: always
+    networks:
+      - event-network
+    ports:
+      - "${API_PORT:-8080}:${API_PORT:-8080}"
     environment:
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@${DB_HOST:-database}:${DB_PORT:-5432}/${DB_NAME:-event_api}
       JWT_SECRET: ${API_JWT_SECRET:-803f6f39-fa46-4993-bbc0-f595e78f2aef}
@@ -63,30 +63,35 @@ services:
       db:
         condition: service_healthy
         restart: true
-    ports:
-      - "${API_PORT:-8080}:${API_PORT:-8080}"
+
   swagger:
     image: swaggerapi/swagger-ui
     container_name: swagger-ui
     networks:
       - event-network
+    ports:
+      - "${SWAGGER_PORT:-81}:80"
     environment:
       SWAGGER_JSON: /usr/share/nginx/html/docs/swagger.yaml
       PORT: 80
       BASE_URL: /docs
     volumes:
       - ./docs/:/usr/share/nginx/html/docs
-    ports:
-      - "${SWAGGER_PORT:-81}:80"
+
   frontend:
-    container_name: fontend
     build:
       context: ./event-reservation-frontend/
       dockerfile: Dockerfile
+    container_name: frontend
     ports:
       - "80:80"
     depends_on:
       - event-api
+
+networks:
+  event-network:
+    name: event-network
+    driver: bridge
 
 # volumes:
 #   db-data:
