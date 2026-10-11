@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/models"
 )
 
 // GetEventsHandler lists all events in the database.

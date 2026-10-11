@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/routes/handlers"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/routes/handlers"
 )
 
 func SetupRoutes(pool *pgxpool.Pool, jwtSecret string) *mux.Router {

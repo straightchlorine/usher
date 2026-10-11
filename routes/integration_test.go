@@ -18,9 +18,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/models"
-	"event-reservation-api/routes"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/models"
+	"github.com/straightchlorine/usher/routes"
 )
 
 // testEnv holds a database pool and an httptest server running the real router.

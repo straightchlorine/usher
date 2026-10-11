@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/models"
 )
 
 // GetUserHandler lists all users.

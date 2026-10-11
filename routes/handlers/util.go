@@ -13,8 +13,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/middlewares"
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/models"
 )
 
 func parseIdFromURL(r *http.Request, message string) (string, error) {

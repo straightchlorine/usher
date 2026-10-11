@@ -5,7 +5,7 @@ services:
     hostname: ${DB_HOST:-database}
     restart: always
     networks:
-      - event-network
+      - usher-network
     ports:
       - "${DB_PORT:-5432}:${DB_PORT:-5432}"
     environment:
@@ -31,7 +31,7 @@ services:
     container_name: nocodb-dashboard
     restart: always
     networks:
-      - event-network
+      - usher-network
     ports:
       - "${NC_DB_PORT:-8081}:${NC_DB_PORT:-8081}"
     environment:
@@ -43,14 +43,14 @@ services:
         condition: service_healthy
         restart: true
 
-  event-api:
+  usher:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: event-api
+    container_name: usher
     restart: always
     networks:
-      - event-network
+      - usher-network
     ports:
       - "${API_PORT:-8080}:${API_PORT:-8080}"
     environment:
@@ -68,7 +68,7 @@ services:
     image: swaggerapi/swagger-ui
     container_name: swagger-ui
     networks:
-      - event-network
+      - usher-network
     ports:
       - "${SWAGGER_PORT:-81}:80"
     environment:
@@ -86,11 +86,11 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - event-api
+      - usher
 
 networks:
-  event-network:
-    name: event-network
+  usher-network:
+    name: usher-network
     driver: bridge
 
 # volumes:

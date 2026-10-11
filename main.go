@@ -12,9 +12,9 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/db"
-	"event-reservation-api/middlewares"
-	"event-reservation-api/routes"
+	"github.com/straightchlorine/usher/db"
+	"github.com/straightchlorine/usher/middlewares"
+	"github.com/straightchlorine/usher/routes"
 )
 
 // Populate the database with initial data if the populate flag is set.
@@ -39,7 +39,7 @@ func populateDatabase(populateFlag *bool, pool *pgxpool.Pool) {
 	}
 }
 
-//	@title			Ticket Reservation API
+//	@title			Usher API
 //	@version		1.0
 //	@description	Simple API for managing ticket reservations.
 

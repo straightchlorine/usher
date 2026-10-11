@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"event-reservation-api/models"
+	"github.com/straightchlorine/usher/models"
 )
 
 // GetReservationHandler lists all reservations.

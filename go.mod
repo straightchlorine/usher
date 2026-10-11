@@ -1,4 +1,4 @@
-module event-reservation-api
+module github.com/straightchlorine/usher
 
 go 1.26.0
 

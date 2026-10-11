@@ -1,4 +1,4 @@
-# Ticket Reservation API
+# Usher
 
 This project is a university exercise designed to simulate a ticket reservation system for sports events. **It does not include payment processing or other real-world functionalities.**
 
@@ -25,7 +25,7 @@ This project is a university exercise designed to simulate a ticket reservation 
 
 1. Clone the repository:
    ```bash
-   git clone git@github.com:straightchlorine/event-reservation-api.git && cd event-reservation-api
+   git clone git@github.com:straightchlorine/usher.git && cd usher
    ```
 
 2. Configure environment variables:
