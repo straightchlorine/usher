@@ -26,7 +26,7 @@ import (
 func GetReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !isAdmin(r) {
-			writeErrorResponse(w, http.StatusBadRequest, "Insufficient permissions.")
+			writeErrorResponse(w, http.StatusForbidden, "Insufficient permissions.")
 			return
 		}
 
@@ -113,26 +113,17 @@ func GetReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 //	@Router			/reservations/{id} [get]
 func GetReservationByIDHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// get the user id
-		userId, err := getUserIdFromContext(r.Context())
+		// get the reservation id and verify permissions
+		reservationId, err := parseReservationIdFromURL(r)
 		if err != nil {
-			writeErrorResponse(
-				w,
-				http.StatusInternalServerError,
-				"Failed to fetch the user identifier.",
-			)
+			writeErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		// permissions
-		if !isAdmin(r) && !isOwner(r, userId) {
+		if !isAdmin(r) && !isReservationOwner(r, pool, reservationId) {
 			writeErrorResponse(w, http.StatusForbidden, "Insufficient permissions.")
 			return
-		}
-
-		reservationId, err := parseReservationIdFromURL(r)
-		if err != nil {
-			writeErrorResponse(w, http.StatusBadRequest, err.Error())
 		}
 
 		var res models.ReservationResponse
@@ -408,11 +399,11 @@ func GetCurrentUserReservationsTicketsHandler(pool *pgxpool.Pool) http.HandlerFu
 func GetUserReservationsHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// get the user id
-		userId, err := getUserIdFromContext(r.Context())
+		userId, err := parseUserIdFromURL(r)
 		if err != nil {
 			writeErrorResponse(
 				w,
-				http.StatusInternalServerError,
+				http.StatusBadRequest,
 				"Failed to fetch the user identifier.",
 			)
 			return
@@ -515,11 +506,11 @@ func GetUserReservationsHandler(pool *pgxpool.Pool) http.HandlerFunc {
 func GetUserReservationsTicketsHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// get the user id
-		userID, err := getUserIdFromContext(r.Context())
+		userID, err := parseUserIdFromURL(r)
 		if err != nil {
 			writeErrorResponse(
 				w,
-				http.StatusInternalServerError,
+				http.StatusBadRequest,
 				"Failed to fetch the user identifier.",
 			)
 			return
@@ -616,6 +607,7 @@ func GetReservationTicketsHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		reservationId, err := parseReservationIdFromURL(r)
 		if err != nil {
 			writeErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		tx, err := pool.Begin(r.Context())
@@ -814,6 +806,7 @@ func CreateReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		err = setAvailableTickets(r.Context(), tx, req.EventID, req.TotalTickets)
 		if err != nil {
 			writeErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
 		}
 
 		// insert a reservation
@@ -919,26 +912,17 @@ func CreateReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 //	@Router			/reservations/{id}/cancel [post]
 func CancelReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// get the user id
-		userId, err := getUserIdFromContext(r.Context())
+		// get the reservation id and verify permissions
+		reservationId, err := parseReservationIdFromURL(r)
 		if err != nil {
-			writeErrorResponse(
-				w,
-				http.StatusInternalServerError,
-				"Failed to fetch the user identifier.",
-			)
+			writeErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		// permissions
-		if !isAdmin(r) && !isOwner(r, userId) {
+		if !isAdmin(r) && !isReservationOwner(r, pool, reservationId) {
 			writeErrorResponse(w, http.StatusForbidden, "Insufficient permissions.")
 			return
-		}
-
-		reservationId, err := parseReservationIdFromURL(r)
-		if err != nil {
-			writeErrorResponse(w, http.StatusBadRequest, err.Error())
 		}
 
 		// start a transaction
@@ -1003,7 +987,7 @@ func DeleteReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		if !isAdmin(r) {
 			writeErrorResponse(
 				w,
-				http.StatusBadRequest,
+				http.StatusForbidden,
 				"Insufficient permissions to delete selected reservation.",
 			)
 			return
@@ -1012,6 +996,7 @@ func DeleteReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		reservationId, err := parseReservationIdFromURL(r)
 		if err != nil {
 			writeErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		tx, err := pool.Begin(r.Context())
