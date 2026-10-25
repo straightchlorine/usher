@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/straightchlorine/usher/db"
 	"github.com/straightchlorine/usher/middlewares"
 	"github.com/straightchlorine/usher/models"
 	"github.com/straightchlorine/usher/routes"
@@ -50,6 +52,11 @@ func setupEnv(t *testing.T) *testEnv {
 	t.Cleanup(pool.Close)
 	if err := pool.Ping(context.Background()); err != nil {
 		t.Fatalf("ping test database: %v", err)
+	}
+
+	// demo account is seeded at startup in main.go; do the same here
+	if err := db.EnsureDemoUser(context.Background(), pool); err != nil {
+		t.Fatalf("seed demo user: %v", err)
 	}
 
 	srv := httptest.NewServer(routes.SetupRoutes(pool, secret))
@@ -346,4 +353,203 @@ func TestConcurrentReservationsDoNotOversell(t *testing.T) {
 	if reservations != available {
 		t.Errorf("stored reservations = %d, want %d", reservations, available)
 	}
+}
+
+// availableTickets reads the current available_tickets of an event.
+func (e *testEnv) availableTickets(eventID int) int {
+	e.t.Helper()
+	var n int
+	if err := e.pool.QueryRow(
+		context.Background(),
+		`SELECT available_tickets FROM events WHERE id = $1`, eventID,
+	).Scan(&n); err != nil {
+		e.t.Fatalf("read available tickets: %v", err)
+	}
+	return n
+}
+
+func TestDeleteEventRequiresAdmin(t *testing.T) {
+	e := setupEnv(t)
+	_, userName, userPass := e.seedUser("REGISTERED")
+	_, adminName, adminPass := e.seedUser("ADMIN")
+	tokenUser := e.tokenFor(userName, userPass)
+	tokenAdmin := e.tokenFor(adminName, adminPass)
+
+	eventID := e.seedEvent(5)
+	path := "/api/events/" + strconv.Itoa(eventID)
+
+	e.expect(http.StatusForbidden, "non-admin deletes event", "DELETE", path, tokenUser, nil)
+	var count int
+	if err := e.pool.QueryRow(
+		context.Background(), `SELECT COUNT(*) FROM events WHERE id = $1`, eventID,
+	).Scan(&count); err != nil || count != 1 {
+		t.Fatalf("event after rejected delete: count %d, err %v", count, err)
+	}
+
+	e.expect(http.StatusOK, "admin deletes event", "DELETE", path, tokenAdmin, nil)
+	if err := e.pool.QueryRow(
+		context.Background(), `SELECT COUNT(*) FROM events WHERE id = $1`, eventID,
+	).Scan(&count); err != nil || count != 0 {
+		t.Errorf("event after admin delete: count %d, err %v", count, err)
+	}
+}
+
+func TestCreateUserRequiresAdmin(t *testing.T) {
+	e := setupEnv(t)
+	_, userName, userPass := e.seedUser("REGISTERED")
+	tokenUser := e.tokenFor(userName, userPass)
+
+	newName := "new-" + uuid.NewString()[:8]
+	e.expect(http.StatusForbidden, "non-admin creates user", "PUT", "/api/users/", tokenUser,
+		map[string]any{
+			"name": "New", "surname": "User", "username": newName,
+			"email": newName + "@example.test", "password": "pw-" + newName,
+			"role_name": "REGISTERED", "is_active": true,
+		})
+
+	var count int
+	if err := e.pool.QueryRow(
+		context.Background(), `SELECT COUNT(*) FROM users WHERE username = $1`, newName,
+	).Scan(&count); err != nil || count != 0 {
+		t.Errorf("user created despite 403: count %d, err %v", count, err)
+	}
+}
+
+func TestCancelReservationRestoresTickets(t *testing.T) {
+	e := setupEnv(t)
+	_, username, password := e.seedUser("REGISTERED")
+	token := e.tokenFor(username, password)
+	eventID := e.seedEvent(10)
+
+	resPath := "/api/reservations/" + e.reserve(token, eventID, 3)
+	if got := e.availableTickets(eventID); got != 7 {
+		t.Fatalf("available after reserving 3 = %d, want 7", got)
+	}
+
+	e.expect(http.StatusOK, "first cancel", "POST", resPath+"/cancel", token, nil)
+	if got := e.availableTickets(eventID); got != 10 {
+		t.Errorf("available after cancel = %d, want 10", got)
+	}
+
+	e.expect(http.StatusConflict, "second cancel", "POST", resPath+"/cancel", token, nil)
+	if got := e.availableTickets(eventID); got != 10 {
+		t.Errorf("available after second cancel = %d, want 10", got)
+	}
+}
+
+func TestDeleteReservationRestoresTickets(t *testing.T) {
+	e := setupEnv(t)
+	_, username, password := e.seedUser("REGISTERED")
+	_, adminName, adminPass := e.seedUser("ADMIN")
+	token := e.tokenFor(username, password)
+	tokenAdmin := e.tokenFor(adminName, adminPass)
+	eventID := e.seedEvent(10)
+
+	resPath := "/api/reservations/" + e.reserve(token, eventID, 4)
+	if got := e.availableTickets(eventID); got != 6 {
+		t.Fatalf("available after reserving 4 = %d, want 6", got)
+	}
+
+	e.expect(http.StatusOK, "admin deletes confirmed reservation", "DELETE", resPath,
+		tokenAdmin, nil)
+	if got := e.availableTickets(eventID); got != 10 {
+		t.Errorf("available after delete = %d, want 10", got)
+	}
+
+	// deleting an already cancelled reservation must not return tickets twice
+	resPath = "/api/reservations/" + e.reserve(token, eventID, 2)
+	e.expect(http.StatusOK, "cancel", "POST", resPath+"/cancel", token, nil)
+	e.expect(http.StatusOK, "admin deletes cancelled reservation", "DELETE", resPath,
+		tokenAdmin, nil)
+	if got := e.availableTickets(eventID); got != 10 {
+		t.Errorf("available after deleting cancelled = %d, want 10", got)
+	}
+}
+
+func TestRegister(t *testing.T) {
+	e := setupEnv(t)
+	suffix := uuid.NewString()[:8]
+	body := models.RegisterRequest{
+		Name: "Jane", Surname: "Fan", Username: "jane." + suffix,
+		Email: "jane-" + suffix + "@example.test", Password: "matchday1",
+	}
+
+	out := e.expect(http.StatusCreated, "register", "POST", "/api/register", "", body)
+	var created models.SuccessResponseCreateUUID
+	if err := json.Unmarshal(out, &created); err != nil || created.UUID == "" {
+		t.Fatalf("register: no id in response %q (err %v)", out, err)
+	}
+	if created.Message != "Account created." {
+		t.Errorf("register message = %q", created.Message)
+	}
+
+	// the new account is an active REGISTERED user who can log in
+	var role string
+	var active bool
+	if err := e.pool.QueryRow(
+		context.Background(),
+		`SELECT r.name, u.is_active FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = $1`,
+		created.UUID,
+	).Scan(&role, &active); err != nil || role != "REGISTERED" || !active {
+		t.Errorf("registered user: role %q, active %v, err %v", role, active, err)
+	}
+	e.tokenFor(body.Username, body.Password)
+
+	// same username, fresh email
+	dupName := body
+	dupName.Email = "other-" + suffix + "@example.test"
+	e.expect(http.StatusConflict, "duplicate username", "POST", "/api/register", "", dupName)
+
+	// same email, fresh username
+	dupMail := body
+	dupMail.Username = "other." + suffix
+	out = e.expect(http.StatusConflict, "duplicate email", "POST", "/api/register", "", dupMail)
+	if !bytes.Contains(out, []byte("That username or email is already registered.")) {
+		t.Errorf("duplicate message = %q", out)
+	}
+}
+
+func TestRegisterValidation(t *testing.T) {
+	e := setupEnv(t)
+	suffix := uuid.NewString()[:8]
+	valid := models.RegisterRequest{
+		Name: "Jane", Surname: "Fan", Username: "val." + suffix,
+		Email: "val-" + suffix + "@example.test", Password: "matchday1",
+	}
+
+	short := valid
+	short.Password = "short"
+	e.expect(http.StatusBadRequest, "short password", "POST", "/api/register", "", short)
+
+	badName := valid
+	badName.Username = "bad name!"
+	e.expect(http.StatusBadRequest, "bad username chars", "POST", "/api/register", "", badName)
+
+	badMail := valid
+	badMail.Email = "no-at-sign"
+	e.expect(http.StatusBadRequest, "email without @", "POST", "/api/register", "", badMail)
+
+	missing := valid
+	missing.Surname = ""
+	e.expect(http.StatusBadRequest, "missing surname", "POST", "/api/register", "", missing)
+
+	var count int
+	if err := e.pool.QueryRow(
+		context.Background(), `SELECT COUNT(*) FROM users WHERE username = $1`, valid.Username,
+	).Scan(&count); err != nil || count != 0 {
+		t.Errorf("user created despite 400: count %d, err %v", count, err)
+	}
+}
+
+func TestDemoUserCanLogIn(t *testing.T) {
+	e := setupEnv(t)
+	username := os.Getenv("DEMO_USERNAME")
+	if username == "" {
+		username = "demo"
+	}
+	password := os.Getenv("DEMO_PASSWORD")
+	if password == "" {
+		password = "matchday"
+	}
+	e.tokenFor(username, password)
 }
