@@ -62,9 +62,13 @@ func AddAdminUser(fake *gofakeit.Faker, pool *pgxpool.Pool) error {
 	root_password := os.Getenv("ROOT_PASSWORD")
 	root_username := os.Getenv("ROOT_NAME")
 
-	// if not provided, go with root
+	// no password, no admin: there is no safe default
 	if root_password == "" {
-		root_password = "root"
+		log.Println("ROOT_PASSWORD is not set; no admin account was created")
+		if pool != nil {
+			return EnsureDemoUser(context.Background(), pool)
+		}
+		return nil
 	}
 	if root_username == "" {
 		root_username = "root"
@@ -120,15 +124,16 @@ func AddAdminUser(fake *gofakeit.Faker, pool *pgxpool.Pool) error {
 }
 
 // EnsureDemoUser makes sure the demo fan account exists. It does nothing if the
-// username is already taken, so it is safe to run on every startup.
+// username is already taken, so it is safe to run on every startup. It is
+// skipped when DEMO_PASSWORD is empty.
 func EnsureDemoUser(ctx context.Context, pool *pgxpool.Pool) error {
 	username := os.Getenv("DEMO_USERNAME")
 	password := os.Getenv("DEMO_PASSWORD")
+	if password == "" {
+		return nil
+	}
 	if username == "" {
 		username = "demo"
-	}
-	if password == "" {
-		password = "matchday"
 	}
 
 	var exists bool
@@ -513,6 +518,9 @@ func populateReservations(ctx context.Context, pool *pgxpool.Pool) error {
 // for the second-soonest fixture and one CANCELLED (1 STANDARD) on the fourth,
 // so My tickets shows both sections.
 func populateDemoReservation(ctx context.Context, pool *pgxpool.Pool) error {
+	if os.Getenv("DEMO_PASSWORD") == "" {
+		return nil
+	}
 	username := os.Getenv("DEMO_USERNAME")
 	if username == "" {
 		username = "demo"

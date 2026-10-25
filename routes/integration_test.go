@@ -43,6 +43,10 @@ func setupEnv(t *testing.T) *testEnv {
 
 	// same secret source as main.go
 	t.Setenv("JWT_SECRET", "integration-test-secret")
+	// the demo account is skipped without a password
+	if os.Getenv("DEMO_PASSWORD") == "" {
+		t.Setenv("DEMO_PASSWORD", "matchday")
+	}
 	secret := middlewares.InitJWTSecret()
 
 	pool, err := pgxpool.New(context.Background(), dbURL)
@@ -548,8 +552,5 @@ func TestDemoUserCanLogIn(t *testing.T) {
 		username = "demo"
 	}
 	password := os.Getenv("DEMO_PASSWORD")
-	if password == "" {
-		password = "matchday"
-	}
 	e.tokenFor(username, password)
 }
