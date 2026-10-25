@@ -58,6 +58,11 @@ func setupEnv(t *testing.T) *testEnv {
 		t.Fatalf("ping test database: %v", err)
 	}
 
+	// schema is created at startup in main.go; do the same here
+	if err := db.EnsureSchema(context.Background(), pool); err != nil {
+		t.Fatalf("ensure schema: %v", err)
+	}
+
 	// demo account is seeded at startup in main.go; do the same here
 	if err := db.EnsureDemoUser(context.Background(), pool); err != nil {
 		t.Fatalf("seed demo user: %v", err)
@@ -553,4 +558,133 @@ func TestDemoUserCanLogIn(t *testing.T) {
 	}
 	password := os.Getenv("DEMO_PASSWORD")
 	e.tokenFor(username, password)
+}
+
+func TestHealth(t *testing.T) {
+	e := setupEnv(t)
+	out := e.expect(http.StatusOK, "health", "GET", "/api/health", "", nil)
+	if !bytes.Contains(out, []byte(`"ok"`)) {
+		t.Fatalf("unexpected health body %q", out)
+	}
+}
+
+func TestProxyKeyMiddleware(t *testing.T) {
+	e := setupEnv(t)
+	secret := "proxy-secret"
+	srv := httptest.NewServer(middlewares.RequireProxyKey(secret, routes.SetupRoutes(e.pool, "x")))
+	defer srv.Close()
+
+	get := func(path, key string) int {
+		req, _ := http.NewRequest("GET", srv.URL+path, nil)
+		if key != "" {
+			req.Header.Set(middlewares.ProxyKeyHeader, key)
+		}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer resp.Body.Close()
+		return resp.StatusCode
+	}
+	if c := get("/api/events", ""); c != http.StatusForbidden {
+		t.Fatalf("no header: got %d, want 403", c)
+	}
+	if c := get("/api/events", "wrong"); c != http.StatusForbidden {
+		t.Fatalf("wrong header: got %d, want 403", c)
+	}
+	if c := get("/api/events", secret); c != http.StatusOK {
+		t.Fatalf("with header: got %d, want 200", c)
+	}
+	if c := get("/api/health", ""); c != http.StatusOK {
+		t.Fatalf("health without header: got %d, want 200", c)
+	}
+}
+
+func TestEnsureSchemaNoOpOnExistingSchema(t *testing.T) {
+	e := setupEnv(t)
+	ctx := context.Background()
+	var before int
+	if err := e.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&before); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.EnsureSchema(ctx, e.pool); err != nil {
+		t.Fatalf("ensure schema: %v", err)
+	}
+	var after int
+	if err := e.pool.QueryRow(ctx, "SELECT COUNT(*) FROM users").Scan(&after); err != nil {
+		t.Fatal(err)
+	}
+	if before != after || before == 0 {
+		t.Fatalf("users before %d, after %d; schema was touched or empty", before, after)
+	}
+}
+
+func TestResetDemo(t *testing.T) {
+	e := setupEnv(t)
+	ctx := context.Background()
+	t.Setenv("ROOT_PASSWORD", "root-test-pass")
+
+	for i := 0; i < 2; i++ { // second pass: also works on already-reset data
+		extraID, _, _ := e.seedUser("REGISTERED")
+		eventID := e.seedEvent(5)
+		if _, err := e.pool.Exec(ctx, `
+			INSERT INTO reservations (user_id, event_id, total_tickets, status_id)
+			VALUES ($1, $2, 1, (SELECT id FROM reservation_statuses WHERE name = 'CONFIRMED'))`,
+			extraID, eventID); err != nil {
+			t.Fatal(err)
+		}
+
+		if err := db.ResetDemo(ctx, e.pool); err != nil {
+			t.Fatalf("reset demo: %v", err)
+		}
+
+		count := func(q string, args ...any) int {
+			var n int
+			if err := e.pool.QueryRow(ctx, q, args...).Scan(&n); err != nil {
+				t.Fatal(err)
+			}
+			return n
+		}
+		if n := count("SELECT COUNT(*) FROM events WHERE date > NOW()"); n != 16 {
+			t.Fatalf("upcoming events = %d, want 16", n)
+		}
+		if n := count("SELECT COUNT(*) FROM users WHERE id = $1::uuid", extraID); n != 0 {
+			t.Fatal("extra user survived reset")
+		}
+		if n := count("SELECT COUNT(*) FROM users WHERE username IN ('root', 'demo')"); n != 2 {
+			t.Fatalf("root/demo users = %d, want 2", n)
+		}
+		if n := count(`SELECT COUNT(*) FROM reservations r JOIN users u ON u.id = r.user_id
+			WHERE u.username = 'demo'`); n != 2 {
+			t.Fatalf("demo reservations = %d, want 2", n)
+		}
+	}
+}
+
+// A body past the middleware cap is refused with an error status, not a crash.
+func TestOversizedBodyRejected(t *testing.T) {
+	e := setupEnv(t)
+	srv := httptest.NewServer(middlewares.LimitBody(1<<20, routes.SetupRoutes(e.pool, middlewares.InitJWTSecret())))
+	defer srv.Close()
+
+	big := bytes.Repeat([]byte("a"), 2<<20)
+	payload := append(append([]byte(`{"username":"`), big...), []byte(`","password":"x"}`)...)
+	resp, err := http.Post(srv.URL+"/api/login", "application/json", bytes.NewReader(payload))
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 400 || resp.StatusCode >= 500 {
+		t.Fatalf("2 MiB body: want 4xx, got %d", resp.StatusCode)
+	}
+
+	// small bodies still pass the limiter
+	resp2, err := http.Post(srv.URL+"/api/login", "application/json", bytes.NewReader([]byte(`{"username":"x","password":"y"}`)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp2.Body.Close()
+	if resp2.StatusCode == http.StatusRequestEntityTooLarge {
+		t.Fatalf("small body rejected as too large")
+	}
 }
