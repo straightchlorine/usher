@@ -37,7 +37,7 @@ func generateRandomSecret() (string, error) {
 }
 
 // Creates a JWT token with user claims.
-func GenerateJWT(userID string, role string, secret string) (string, int64, error) {
+func GenerateJWT(userID string, username string, role string, secret string) (string, int64, error) {
 	// get the token validity duration from env variable, otherwise 24 hours
 	validHours, err := getEnvAsInt("TOKEN_VALID_HOURS", 24)
 	if err != nil {
@@ -48,9 +48,10 @@ func GenerateJWT(userID string, role string, secret string) (string, int64, erro
 
 	// generate the claims
 	claims := jwt.MapClaims{
-		"userID": userID,
-		"role":   role,
-		"exp":    expirationTime,
+		"userID":   userID,
+		"username": username,
+		"role":     role,
+		"exp":      expirationTime,
 	}
 
 	// create the JWT token
