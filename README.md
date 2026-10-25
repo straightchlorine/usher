@@ -113,3 +113,11 @@ Utilising provided `.env`:
 
 - **Authentication:** Many routes require authentication with role-based permissions (e.g., admin, owner).
 - **Dynamic IDs:** Routes using `{id}` operate on a specific resource identified by its ID.
+
+---
+
+<div align="center">
+
+To the only God, be honour and glory for ever and ever.
+
+</div>
