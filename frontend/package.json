@@ -14,7 +14,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "worker:test": "node --test worker/*.test.mjs",
+    "worker:dev": "wrangler dev"
   },
   "eslintConfig": {
     "extends": [
@@ -33,5 +35,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "wrangler": "4.152.0"
   }
 }
