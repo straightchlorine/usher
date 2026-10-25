@@ -1,7 +1,6 @@
 services:
   db:
-    image: postgres
-    container_name: postgres
+    image: postgres:17-alpine
     hostname: ${DB_HOST:-database}
     restart: always
     networks:
@@ -27,8 +26,7 @@ services:
       retries: 5
 
   nocodb:
-    image: nocodb/nocodb
-    container_name: nocodb-dashboard
+    image: nocodb/nocodb:2026.10.0
     restart: always
     networks:
       - usher-network
@@ -47,8 +45,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: usher
     restart: always
+    # the image does not seed data by default; the local demo does
+    command: ["--populate"]
     networks:
       - usher-network
     ports:
@@ -67,8 +66,7 @@ services:
         restart: true
 
   swagger:
-    image: swaggerapi/swagger-ui
-    container_name: swagger-ui
+    image: swaggerapi/swagger-ui:v5.34.0
     networks:
       - usher-network
     ports:
@@ -82,11 +80,14 @@ services:
 
   frontend:
     build:
-      context: ./frontend/
-      dockerfile: Dockerfile
-    container_name: frontend
+      context: ./frontend
+    restart: always
+    networks:
+      - usher-network
     ports:
-      - "80:80"
+      - "${WEB_PORT:-80}:8080"
+    environment:
+      USHER_API_URL: http://usher:8080
     depends_on:
       - usher
 
