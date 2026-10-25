@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
@@ -816,7 +817,8 @@ func CreateReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 			VALUES ($1, $2, $3, $4)
 			RETURNING id
 		`
-		if err = tx.QueryRow(r.Context(),
+		if err = tx.QueryRow(
+			r.Context(),
 			reservationQuery,
 			req.UserID,
 			req.EventID,
@@ -872,6 +874,7 @@ func CreateReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 				http.StatusInternalServerError,
 				"Failed to confirm reservation.",
 			)
+			return
 		}
 
 		// commit the transaction
@@ -933,6 +936,34 @@ func CancelReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 		defer tx.Rollback(r.Context())
 
+		// lock the reservation, so concurrent cancels cannot both return the tickets
+		var eventId, totalTickets int
+		var currentStatus string
+		lockQuery := `
+			SELECT r.event_id, r.total_tickets, rs.name
+			FROM reservations r
+			JOIN reservation_statuses rs ON rs.id = r.status_id
+			WHERE r.id = $1
+			FOR UPDATE OF r
+		`
+		if err := tx.QueryRow(r.Context(), lockQuery, reservationId).
+			Scan(&eventId, &totalTickets, &currentStatus); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				writeErrorResponse(w, http.StatusNotFound, "Reservation not found.")
+				return
+			}
+			writeErrorResponse(
+				w,
+				http.StatusInternalServerError,
+				"Failed to fetch the reservation.",
+			)
+			return
+		}
+		if currentStatus == "CANCELLED" {
+			writeErrorResponse(w, http.StatusConflict, "Reservation already cancelled.")
+			return
+		}
+
 		if err := updateTicketsStatus(r.Context(), tx, reservationId, "CANCELLED"); err != nil {
 			writeErrorResponse(
 				w,
@@ -948,6 +979,11 @@ func CancelReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 				http.StatusInternalServerError,
 				"Failed to cancel the reservation.",
 			)
+			return
+		}
+
+		if err := setAvailableTickets(r.Context(), tx, eventId, -totalTickets); err != nil {
+			writeErrorResponse(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
@@ -1010,19 +1046,27 @@ func DeleteReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 		defer tx.Rollback(r.Context())
 
-		// check if the reservation exists
-		var exists bool
-		checkReservationQuery := `SELECT EXISTS(SELECT 1 FROM Reservations WHERE id = $1)`
-		if err := tx.QueryRow(r.Context(), checkReservationQuery, reservationId).Scan(&exists); err != nil {
+		// fetch and lock the reservation in order to check its existence and status
+		var eventId, totalTickets int
+		var currentStatus string
+		lockQuery := `
+			SELECT r.event_id, r.total_tickets, rs.name
+			FROM reservations r
+			JOIN reservation_statuses rs ON rs.id = r.status_id
+			WHERE r.id = $1
+			FOR UPDATE OF r
+		`
+		if err := tx.QueryRow(r.Context(), lockQuery, reservationId).
+			Scan(&eventId, &totalTickets, &currentStatus); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				writeErrorResponse(w, http.StatusNotFound, "Reservation not found.")
+				return
+			}
 			writeErrorResponse(
 				w,
 				http.StatusInternalServerError,
 				"Failed to verify reservation existence.",
 			)
-			return
-		}
-		if !exists {
-			writeErrorResponse(w, http.StatusNotFound, "Reservation not found.")
 			return
 		}
 
@@ -1040,6 +1084,14 @@ func DeleteReservationHandler(pool *pgxpool.Pool) http.HandlerFunc {
 				"Failed to delete reservation.",
 			)
 			return
+		}
+
+		// cancelled reservations already returned their tickets
+		if currentStatus != "CANCELLED" {
+			if err := setAvailableTickets(r.Context(), tx, eventId, -totalTickets); err != nil {
+				writeErrorResponse(w, http.StatusInternalServerError, err.Error())
+				return
+			}
 		}
 
 		if err := tx.Commit(r.Context()); err != nil {
