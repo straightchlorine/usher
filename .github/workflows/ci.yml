@@ -81,6 +81,9 @@ jobs:
       - run: npm run build
         env:
           CI: "true"
+      - run: npm run worker:test
+      - name: Worker dry run
+        run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/worker"
 
   lint:
     runs-on: ubuntu-latest
