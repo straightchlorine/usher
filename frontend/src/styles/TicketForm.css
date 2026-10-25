@@ -1,0 +1,52 @@
+.ticket-form-container {
+  width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.ticket-form-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.ticket-form-container form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ticket-form-container label {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.ticket-form-container select {
+  font-size: 16px;
+  padding: 5px 10px;
+  margin-bottom: 15px;
+}
+
+.buy-ticket-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buy-ticket-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}

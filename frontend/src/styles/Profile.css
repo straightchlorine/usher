@@ -1,0 +1,126 @@
+.profile-container {
+  width: 70%;
+  margin: 20px auto;
+  padding: 20px;
+  border-collapse: collapse;
+  font-size: 18px;
+  text-align: center;
+}
+
+.profile-container h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: center;
+}
+
+.reservations-table th, .reservations-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+.reservations-table th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+.reservations-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.reservations-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.reservations-table th:nth-child(1), 
+.reservations-table td:nth-child(1) {
+  width: 40%; 
+  text-align: left;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.reservations-table th:nth-child(2), 
+.reservations-table td:nth-child(2) {
+  width: 20%; 
+}
+
+.reservations-table th:nth-child(3), 
+.reservations-table td:nth-child(3) {
+  width: 8%; 
+}
+
+.reservations-table th:nth-child(4), 
+.reservations-table td:nth-child(4) {
+  width: 15%; 
+}
+
+.reservations-table th:nth-child(5), 
+.reservations-table td:nth-child(5) {
+  width: 17%; 
+}
+
+.reservations-table td.status-sold {
+  background-color: #16af3a;
+  color: black;
+  font-weight: bold;
+}
+
+.reservations-table td.status-reserved {
+  background-color: #e6c42f;
+  color: black;
+  font-weight: bold;
+}
+
+.reservations-table td.status-cancelled {
+  background-color: #da1d2d;
+  color: black;
+  font-weight: bold;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px; 
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-button:hover {
+  background: linear-gradient(90deg, #0056b3, #007bff);
+  transform: scale(1.05);
+}
+
+.pagination-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-info {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}

@@ -1,0 +1,111 @@
+.event-table {
+  width: 70%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  font-size: 18px;
+  text-align: center;
+}
+
+.event-table th, .event-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+.event-table th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+.event-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.event-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.event-table td:first-child {
+  text-align: left;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.event-table th:nth-child(1),
+.event-table td:nth-child(1) {
+  width: 55%; 
+}
+
+.event-table th:nth-child(2),
+.event-table td:nth-child(2) {
+  width: 20%; 
+}
+
+.event-table th:nth-child(3),
+.event-table td:nth-child(3) {
+  width: 8%; 
+}
+
+.event-table th:nth-child(4),
+.event-table td:nth-child(4) {
+  width: 12%; 
+}
+
+.event-table th:nth-child(5),
+.event-table td:nth-child(5) {
+  width: 5%; 
+}
+
+.buy-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buy-button:hover {
+  background-color: #0056b3;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px; 
+}
+
+.pagination-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  background: linear-gradient(90deg, #007bff, #0056b3);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-button:hover {
+  background: linear-gradient(90deg, #0056b3, #007bff);
+  transform: scale(1.05);
+}
+
+.pagination-button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-info {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}

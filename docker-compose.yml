@@ -80,7 +80,7 @@ services:
 
   frontend:
     build:
-      context: ./event-reservation-frontend/
+      context: ./frontend/
       dockerfile: Dockerfile
     container_name: frontend
     ports:
