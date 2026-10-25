@@ -117,15 +117,13 @@ Pushing a `vX.Y.Z` (or `vX.Y.Z-rc.N`) tag runs the release workflow:
 4. builds both images from clean layers for amd64 and arm64, pushes them to GHCR and Docker Hub with provenance and SBOM attestations,
 5. signs both registry refs by digest with cosign,
 6. creates the GitHub release (marked pre-release when the tag has a suffix).
+7. once the images are published, deploys the web Worker (`deploy-web`); every tag, release candidates included, deploys the production Worker.
 
 Use `v1.0.0-rc.1` as the first tag to exercise the pipeline, then `v1.0.0`.
 
-### Repository settings (one time)
+## Deployment
 
-- Create the GitHub environment `docker` with the variable `DOCKERHUB_USERNAME` (equal to the GitHub owner, which is the Docker Hub namespace) and the secret `DOCKERHUB_TOKEN` (Docker Hub access token, read/write).
-- Restrict the `docker` environment's deployment branches and tags to the tag pattern `v*`.
-- Add a tag ruleset for `v*` limiting tag creation and updates to maintainers.
-- After the first release, set both GHCR packages (`usher/api`, `usher/web`) to public and link them to the repository.
+The API runs on Kubernetes (Argo CD, manifests in `k8s/`) and the SPA on a Cloudflare Worker that proxies `/api/*` to it. Runbook: [k8s/README.md](k8s/README.md).
 
 ## API Endpoints
 
