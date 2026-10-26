@@ -1,5 +1,5 @@
 .admin {
-  padding: var(--space-5) 0 var(--space-7);
+  padding: 0 0 var(--space-7);
 }
 
 .admin__head {
@@ -200,6 +200,10 @@
   min-width: 960px;
 }
 
+.admin-table__actions .icon-btn {
+  color: var(--danger);
+}
+
 .admin-table__danger {
   color: var(--danger);
 }
@@ -380,10 +384,6 @@
 
   .admin-table__actions .btn {
     min-height: 44px;
-  }
-
-  .admin-table__actions .icon-btn {
-    color: var(--danger);
   }
 
   .admin-table tbody tr.admin-confirm {

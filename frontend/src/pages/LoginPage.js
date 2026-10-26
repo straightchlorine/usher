@@ -3,13 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { errorMessage } from '../api';
 import { Button, Field, LinkButton, PasswordField, UpNext } from '../components/ui';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import './AuthPages.css';
 
 const MISMATCH = "That username and password don't match. Check them and try again.";
 
 export default function LoginPage() {
-  usePageTitle('Sign in');
+  usePageMeta('login');
   const { user, signIn, signInDemo } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -57,6 +57,17 @@ export default function LoginPage() {
     <div className="auth auth--with-side">
       <div className="auth__card">
         <h1 className="auth__title">Sign in</h1>
+        <Button
+          variant="primary"
+          size="lg"
+          block
+          loading={busy === 'demo'}
+          disabled={busy === 'form'}
+          onClick={() => run('demo', signInDemo)}
+        >
+          Continue with the demo account
+        </Button>
+        <div className="auth__divider">or sign in with your account</div>
         <form className="auth__form" onSubmit={onSubmit} noValidate={false}>
           <Field
             label="Username"
@@ -87,17 +98,6 @@ export default function LoginPage() {
             Sign in
           </Button>
         </form>
-        <div className="auth__divider" aria-hidden="true">or</div>
-        <Button
-          variant="primary"
-          size="lg"
-          block
-          loading={busy === 'demo'}
-          disabled={busy === 'form'}
-          onClick={() => run('demo', signInDemo)}
-        >
-          Continue with the demo account
-        </Button>
         <p className="auth__alt">
           New here? <Link className="auth__link" to="/register">Create an account</Link>
         </p>

@@ -1,0 +1,25 @@
+# Usher
+
+> Football ticket reservation system: a Go REST API, PostgreSQL and a React app behind a Cloudflare Worker, run on k3s with Argo CD. These docs cover running it, how it works and how it is released.
+
+Usher lets fans browse fixtures, reserve tickets and cancel; admins manage fixtures, venues and reservations. There is no payment step.
+
+## Docs
+
+- [Football ticket reservation system in Go and React](https://docs.usher.piotrkrzysztof.dev/): Usher is a football ticket reservation demo: a Go REST API, PostgreSQL and a React app. Browse fixtures, book tickets and cancel. Try it live or self-host.
+- [Run Usher locally with Docker Compose and Postgres](https://docs.usher.piotrkrzysztof.dev/getting-started/): Start Usher with Docker Compose: PostgreSQL, the Go API, the React web app, NocoDB and Swagger UI. Ports, demo login and every environment variable listed.
+- [Usher architecture: Go API, React app, Worker](https://docs.usher.piotrkrzysztof.dev/architecture/): How Usher fits together: a Go API on PostgreSQL, a React single-page app, and a Cloudflare Worker that proxies the API with rate limits, on k3s with Argo CD.
+- [Usher REST API endpoints, roles and Swagger spec](https://docs.usher.piotrkrzysztof.dev/api/): Every Usher REST endpoint for events, locations, reservations, users and login, with the role each one needs. The full Swagger spec is linked from the page.
+- [Usher container images, tags and signatures](https://docs.usher.piotrkrzysztof.dev/images/): Pull the Usher api and web images from GHCR or Docker Hub, see the tags and environment variables of each, and verify the cosign signature of a release.
+- [Self-host Usher on Kubernetes and Cloudflare](https://docs.usher.piotrkrzysztof.dev/deployment/): Deploy the Usher API on k3s with Argo CD and sealed secrets, and the web app as a Cloudflare Worker proxy. DNS, database, secrets, GitHub settings and checks.
+- [Release Usher: version bump, tags and workflow](https://docs.usher.piotrkrzysztof.dev/releasing/): How to cut an Usher release: just bump-version, a signed tag on master, and what the release workflow does with the images, the Worker and the GitHub release.
+- [About Usher: the authors and the project history](https://docs.usher.piotrkrzysztof.dev/about/): Usher is built by Piotr Krzysztof Lis and Jakub Kucharski. A revived university project, deployed as a live football ticket reservation demo with no payments.
+
+## Optional
+
+- [Source repository](https://github.com/straightchlorine/usher): code, issues and releases
+- [Live demo](https://usher.piotrkrzysztof.dev): the public instance, demo login demo / matchday
+- [Piotr Krzysztof Lis](https://piotrkrzysztof.dev/): author, with [LinkedIn](https://www.linkedin.com/in/straightchlorine/)
+- [Jakub Kucharski](https://www.linkedin.com/in/jakub-kucharski-360811305/): author
+
+To the only God, be honour and glory for ever and ever.

@@ -1,0 +1,31 @@
+/* Usher docs theme - mirrors frontend/src/styles/tokens.css */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #2a2420;
+  --md-primary-fg-color--light: #3b322d;
+  --md-primary-fg-color--dark: #1c1714;
+  --md-accent-fg-color: #b4400a;
+  --md-typeset-a-color: #b4400a;
+  --md-code-hl-comment-color: #595959;
+  --md-code-hl-variable-color: #595959;
+  --md-code-hl-punctuation-color: #595959;
+  --md-code-hl-operator-color: #595959;
+  --md-code-hl-generic-color: #595959;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #2a2420;
+  --md-accent-fg-color: #e8590c;
+  --md-typeset-a-color: #f08a4b;
+  --md-default-bg-color: #1c1714;
+  --md-code-bg-color: #2a2420;
+}
+
+/* Links must differ from body text by more than colour (WCAG 1.4.1) */
+.md-typeset a:not(.md-button):not(.headerlink) {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.md-copyright {
+  color: var(--md-footer-fg-color--light);
+}

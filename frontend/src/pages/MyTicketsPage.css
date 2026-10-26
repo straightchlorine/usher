@@ -207,3 +207,8 @@
     flex: 1 1 100%;
   }
 }
+
+.tickets__more {
+  align-self: flex-start;
+  margin-top: var(--space-3);
+}

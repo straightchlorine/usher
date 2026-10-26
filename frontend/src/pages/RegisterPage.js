@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { errorMessage, register } from '../api';
 import { Button, Field, PasswordField, UpNext } from '../components/ui';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import './AuthPages.css';
 
 const RULES = {
@@ -20,7 +20,7 @@ const RULES = {
 const EMPTY = { name: '', surname: '', username: '', email: '', password: '' };
 
 export default function RegisterPage() {
-  usePageTitle('Create an account');
+  usePageMeta('register');
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const [values, setValues] = useState(EMPTY);
