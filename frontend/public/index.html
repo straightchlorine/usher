@@ -2,18 +2,119 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#2A2420" />
-    <meta
-      name="description"
-      content="Reserve football match tickets: browse fixtures, pick Standard, Student or Senior tickets and get an instant reservation. A demo, no payment taken."
-    />
+    <title>Usher · Football match ticket reservations demo app</title>
+    <meta name="description" content="Usher is a demo football ticket reservation app. Browse fictional fixtures, pick Standard, Student or Senior tickets and reserve instantly. No payment is taken." />
+    <link rel="canonical" href="https://usher.piotrkrzysztof.dev/" />
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Usher · Football match tickets</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Usher" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:title" content="Usher · Football match ticket reservations demo app" />
+    <meta property="og:description" content="Usher is a demo football ticket reservation app. Browse fictional fixtures, pick Standard, Student or Senior tickets and reserve instantly. No payment is taken." />
+    <meta property="og:url" content="https://usher.piotrkrzysztof.dev/" />
+    <meta property="og:image" content="https://usher.piotrkrzysztof.dev/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Usher: football match ticket reservations demo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Usher · Football match ticket reservations demo app" />
+    <meta name="twitter:description" content="Usher is a demo football ticket reservation app. Browse fictional fixtures, pick Standard, Student or Senior tickets and reserve instantly. No payment is taken." />
+    <meta name="twitter:image" content="https://usher.piotrkrzysztof.dev/og.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://usher.piotrkrzysztof.dev/#website",
+          "url": "https://usher.piotrkrzysztof.dev/",
+          "name": "Usher",
+          "inLanguage": "en"
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://usher.piotrkrzysztof.dev/#app",
+          "name": "Usher",
+          "url": "https://usher.piotrkrzysztof.dev/",
+          "description": "Usher is a demo football ticket reservation app. Browse fictional fixtures, pick Standard, Student or Senior tickets and reserve instantly. No payment is taken.",
+          "applicationCategory": "EntertainmentApplication",
+          "operatingSystem": "Web",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          },
+          "author": [
+            {
+              "@id": "https://piotrkrzysztof.dev/#piotr"
+            },
+            {
+              "@id": "https://piotrkrzysztof.dev/#jakub"
+            }
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://piotrkrzysztof.dev/#piotr",
+          "name": "Piotr Krzysztof Lis",
+          "alternateName": "Piotr Krzysztof",
+          "url": "https://piotrkrzysztof.dev",
+          "sameAs": [
+            "https://github.com/straightchlorine",
+            "https://codeberg.org/piotrkrzysztof",
+            "https://pypi.org/user/straightchlorine",
+            "https://hub.docker.com/u/straightchlorine",
+            "https://www.linkedin.com/in/straightchlorine"
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://piotrkrzysztof.dev/#jakub",
+          "name": "Jakub Kucharski",
+          "sameAs": [
+            "https://www.linkedin.com/in/jakub-kucharski-360811305/",
+            "https://github.com/kubson2002k"
+          ]
+        },
+        {
+          "@type": "SoftwareSourceCode",
+          "@id": "https://usher.piotrkrzysztof.dev/#source",
+          "name": "Usher",
+          "codeRepository": "https://github.com/straightchlorine/usher",
+          "programmingLanguage": [
+            "Go",
+            "JavaScript"
+          ],
+          "author": [
+            {
+              "@id": "https://piotrkrzysztof.dev/#piotr"
+            },
+            {
+              "@id": "https://piotrkrzysztof.dev/#jakub"
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run Usher.</noscript>
-    <div id="root"></div>
+    <div id="root">
+      <main>
+        <h1>Usher</h1>
+        <p>
+          Usher is a demo football ticket reservation app. Browse fictional fixtures, choose Standard, Student or
+          Senior tickets and reserve them instantly. No payment is taken.
+        </p>
+        <p><a href="/help">Help</a> · <a href="/about">About Usher</a></p>
+      </main>
+    </div>
   </body>
 </html>
