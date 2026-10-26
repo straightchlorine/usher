@@ -148,6 +148,10 @@ func GetUserByIDHandler(pool *pgxpool.Pool) http.HandlerFunc {
 func CreateUserHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		isAdmin := isAdmin(r)
+		if !isAdmin {
+			writeErrorResponse(w, http.StatusForbidden, "Insufficient permissions.")
+			return
+		}
 
 		// parse the json request
 		user := models.CreateUserRequest{}
@@ -160,6 +164,7 @@ func CreateUserHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		status, err := validateCreateUserPayload(isAdmin, user)
 		if status != 200 && err != nil {
 			writeErrorResponse(w, status, err.Error())
+			return
 		}
 
 		// check if the username is unique
@@ -180,6 +185,7 @@ func CreateUserHandler(pool *pgxpool.Pool) http.HandlerFunc {
 		roleId, err := fetchRoleId(r.Context(), pool, user.RoleName)
 		if err != nil {
 			writeErrorResponse(w, roleId, err.Error())
+			return
 		}
 
 		// insert a new user

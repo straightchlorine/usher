@@ -1,0 +1,45 @@
+:root {
+  --shell: #2a2420;
+  --shell-text: #ffffff;
+  --stripe: #e8590c;
+  --accent: #e8590c;
+  --on-accent: #1c1714;
+  --accent-text: #b4400a;
+  --ground: #f3f1ee;
+  --card: #ffffff;
+  --border: #e4dfda;
+  --border-strong: #8a817a;
+  --ink: #1c1714;
+  --ink-hover: #3b322d;
+  --muted: #5f5650;
+  --danger: #b42318;
+  --focus: #2a2420;
+  --focus-on-shell: #e8590c;
+
+  --font: 'Hanken Grotesk Variable', 'Hanken Grotesk', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-15: 15px;
+  --text-16: 16px;
+  --text-20: 20px;
+  --text-28: 28px;
+  --text-36: 36px;
+
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --radius-button: 12px;
+  --shadow-card: 0 1px 2px rgba(28, 23, 20, 0.06);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --page-max: 1360px;
+}

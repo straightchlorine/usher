@@ -1,0 +1,403 @@
+.admin {
+  padding: var(--space-5) 0 var(--space-7);
+}
+
+.admin__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.admin__title {
+  margin: 0;
+  font-size: var(--text-36);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.admin__tabs {
+  display: inline-flex;
+  padding: var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  background: var(--card);
+}
+
+.admin__tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+  font-size: var(--text-15);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin__tab:hover {
+  background: var(--ground);
+}
+
+.admin__tab[aria-current='page'] {
+  background: var(--shell);
+  color: var(--shell-text);
+}
+
+.admin__status {
+  min-height: var(--space-5);
+  margin-top: var(--space-3);
+}
+
+.admin__notice {
+  margin: 0;
+  font-size: var(--text-14);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Toolbar */
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.admin-toolbar__filter {
+  flex: 0 1 280px;
+  width: auto;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.admin-toolbar__action {
+  flex: none;
+}
+
+.admin-toolbar__filter + .admin-toolbar__action,
+.admin-toolbar__count + .admin-toolbar__action {
+  margin-left: 0;
+}
+
+.admin-nomatch {
+  padding: var(--space-4) 0;
+  color: var(--muted);
+  font-size: var(--text-15);
+}
+
+.admin-toolbar__count {
+  margin: 0;
+  font-size: var(--text-15);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Form panel */
+.admin-form {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-form__title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-20);
+  font-weight: 800;
+}
+
+.admin-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+}
+
+.admin-form__error {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-14);
+  font-weight: 700;
+  color: var(--danger);
+}
+
+.admin-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* Table */
+.admin-table-box {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: var(--text-14);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-table thead th {
+  font-size: var(--text-13);
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table th.admin-table__num,
+.admin-table td.admin-table__num {
+  text-align: right;
+}
+
+.admin-table__strong {
+  font-weight: 700;
+}
+
+.admin-table__sub {
+  display: block;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.admin-table__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.admin-table__actions .btn {
+  min-height: 40px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-14);
+}
+
+.admin-table--wide {
+  min-width: 960px;
+}
+
+.admin-table__danger {
+  color: var(--danger);
+}
+
+.admin-confirm td {
+  background: var(--ground);
+}
+
+.admin-confirm__body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.admin-confirm__text {
+  margin: 0;
+  flex: 1 1 280px;
+  font-weight: 700;
+}
+
+.admin-confirm__buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.admin-skeleton {
+  height: 56px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--border);
+}
+
+@media (max-width: 639px) {
+  .admin {
+    padding-top: var(--space-4);
+  }
+
+  .admin__title {
+    font-size: var(--text-28);
+  }
+
+  .admin__tabs {
+    width: 100%;
+  }
+
+  .admin__tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0 var(--space-2);
+  }
+
+  .admin-toolbar__filter {
+    order: 3;
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  .admin-toolbar__action {
+    margin-left: auto;
+  }
+
+  /* Table rows become stacked cards. */
+  .admin-table-box {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .admin-table,
+  .admin-table--wide {
+    display: block;
+    min-width: 0;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Each row is a card: title, label/value grid, actions. */
+  .admin-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .admin-table td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    text-align: left;
+    order: 3;
+    color: var(--ink);
+    font-size: var(--text-15);
+    overflow-wrap: anywhere;
+  }
+
+  .admin-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--muted);
+    font-size: var(--text-12);
+    font-weight: 700;
+  }
+
+  .admin-table th.admin-table__num,
+  .admin-table td.admin-table__num {
+    text-align: left;
+  }
+
+  .admin-table .cell--title {
+    order: 1;
+    grid-column: 1 / -1;
+    font-size: var(--text-16);
+    line-height: 1.3;
+  }
+
+  .admin-table .cell--lead {
+    order: 2;
+  }
+
+  .admin-table .cell--lead .admin-table__strong,
+  .admin-table .cell--lead .admin-table__sub {
+    display: inline;
+    color: var(--ink);
+    font-weight: 400;
+  }
+
+  .admin-table .cell--lead .admin-table__strong::after {
+    content: ' at ';
+  }
+
+  .admin-table .cell--full {
+    grid-column: 1 / -1;
+  }
+
+  .admin-table .cell--low,
+  .admin-table .cell--flag.admin-table__low {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .admin-table .cell--flag.admin-table__danger {
+    color: var(--danger);
+    font-weight: 700;
+  }
+
+  .admin-table .cell--booked {
+    display: none;
+  }
+
+  .admin-table .cell--actions {
+    order: 4;
+    grid-column: 1 / -1;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-table__actions {
+    justify-content: flex-start;
+    gap: var(--space-2);
+  }
+
+  .admin-table__actions .btn {
+    min-height: 44px;
+  }
+
+  .admin-table__actions .icon-btn {
+    color: var(--danger);
+  }
+
+  .admin-table tbody tr.admin-confirm {
+    display: block;
+    background: var(--ground);
+  }
+
+  .admin-table tr.admin-confirm td {
+    display: block;
+    padding: 0;
+    background: transparent;
+  }
+
+  .admin-confirm__buttons {
+    flex-wrap: wrap;
+  }
+}

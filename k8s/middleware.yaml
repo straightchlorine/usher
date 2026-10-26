@@ -1,0 +1,26 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: usher-api-ratelimit
+  namespace: usher
+spec:
+  # Global backstop only: every request arrives from Cloudflare's network, so
+  # per-client limiting lives in the Worker. Keyed on host, not source IP.
+  rateLimit:
+    average: 1200
+    burst: 300
+    period: 1m
+    sourceCriterion:
+      requestHost: true
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: usher-api-headers
+  namespace: usher
+spec:
+  headers:
+    contentTypeNosniff: true
+    frameDeny: true
+    referrerPolicy: "no-referrer"
+    stsSeconds: 63072000

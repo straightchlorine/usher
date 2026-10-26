@@ -80,3 +80,12 @@ type UpdateUserRequest struct {
 	RoleName *string `json:"role_name,omitempty" example:"admin"`
 	IsActive *bool   `json:"is_active,omitempty" example:"false"`
 }
+
+// Expected self-registration payload.
+type RegisterRequest struct {
+	Name     string `json:"name"     example:"Jane"`
+	Surname  string `json:"surname"  example:"Fan"`
+	Username string `json:"username" example:"jane.fan"`
+	Email    string `json:"email"    example:"jane@example.com"`
+	Password string `json:"password" example:"matchday1"`
+}

@@ -57,7 +57,7 @@ func LoginHandler(pool *pgxpool.Pool, jwtSecret string) http.HandlerFunc {
 		}
 
 		// get the token validity duration from env variable, otherwise 24 hours
-		tokenString, exp, err := middlewares.GenerateJWT(userID, role, jwtSecret)
+		tokenString, exp, err := middlewares.GenerateJWT(userID, loginReq.Username, role, jwtSecret)
 		if err != nil {
 			writeErrorResponse(
 				w,
