@@ -106,6 +106,8 @@ jobs:
         run: docker compose config -q
 
   images:
+    # explicit name: the required check contexts are "images (api)" / "images (web)"
+    name: images (${{ matrix.component }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
