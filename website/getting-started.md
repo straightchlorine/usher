@@ -25,6 +25,8 @@ Demo login: `demo` / `matchday`.
 | NocoDB | [http://localhost:8081](http://localhost:8081) | `NC_DB_PORT` (default `8081`) |
 | Swagger | [http://localhost:81/docs](http://localhost:81/docs) | `SWAGGER_PORT` (default `81`) |
 
+The ports are host ports. If one is already in use on your machine, set its variable in `.env` (see below) and run `docker compose up -d` again.
+
 PostgreSQL 17 runs as the `db` service. NocoDB is a visual database explorer with its own metadata database. Swagger UI serves `docs/swagger.yaml`. The compose file starts the API with `--populate`, which loads the fake demo events, locations and users.
 
 ## Environment variables
@@ -58,3 +60,15 @@ Compose maps these onto the API container as `DATABASE_URL`, `JWT_SECRET`, `ROOT
 ## Tests
 
 `just test` vets the Go code and runs the frontend tests.
+
+## Documentation
+
+To build locally, install [uv](https://docs.astral.sh/uv/) and run from the repository root:
+
+```bash
+# build the site into site/
+uv run --with-requirements website/requirements.txt mkdocs build --strict
+
+# preview at http://127.0.0.1:8000, rebuilds on save
+uv run --with-requirements website/requirements.txt mkdocs serve
+```
