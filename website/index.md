@@ -5,11 +5,30 @@ description: "Usher is a football ticket reservation demo: a Go REST API, Postgr
 
 # Usher
 
-[Live demo](https://usher.piotrkrzysztof.dev) &middot; [Source](https://github.com/straightchlorine/usher) &middot; [Swagger spec](https://github.com/straightchlorine/usher/blob/master/docs/swagger.yaml)
+<p align="center">
+  <a href="https://usher.piotrkrzysztof.dev"><img src="assets/favicon.svg" alt="Usher" width="96"></a>
+</p>
 
-Usher is a ticket reservation system for football matches. Fans browse upcoming fixtures, reserve one or more tickets in a single reservation, see their tickets and cancel. Admins manage fixtures, venues and all reservations.
+<div align="center" markdown>
 
-It started as a university exercise and was revived as a working demo. **There is no payment step**: a reservation confirms immediately.
+[Live demo](https://usher.piotrkrzysztof.dev)
+
+[![CI](https://img.shields.io/github/actions/workflow/status/straightchlorine/usher/ci.yml?branch=master&label=CI)](https://github.com/straightchlorine/usher/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/straightchlorine/usher?include_prereleases&sort=semver)](https://github.com/straightchlorine/usher/releases)
+[![ghcr.io](https://img.shields.io/badge/ghcr.io-api%20%7C%20web-blue?logo=github)](https://github.com/straightchlorine?tab=packages&repo_name=usher)
+[![usher-api pulls](https://img.shields.io/docker/pulls/straightchlorine/usher-api?logo=docker&label=usher-api)](https://hub.docker.com/r/straightchlorine/usher-api)
+[![usher-web pulls](https://img.shields.io/docker/pulls/straightchlorine/usher-web?logo=docker&label=usher-web)](https://hub.docker.com/r/straightchlorine/usher-web)
+
+</div>
+
+Demo football ticket reservation system: Go REST API, PostgreSQL and a React app.
+
+Browse upcoming fixtures, reserve tickets and cancel; admins manage fixtures,
+venues and reservations. It is a university project, revived and deployed as a demo.
+
+**There is no payment processing.**
+
+The API runs on Kubernetes, the web app on a Cloudflare Worker that proxies `/api/*` to it.
 
 ## Try it
 
@@ -36,6 +55,4 @@ The public demo data is reset daily at 04:00 UTC.
 - [Architecture](architecture.md): the API, the database, the web app and the Cloudflare Worker in front.
 - [API](api.md): every endpoint and who may call it.
 - [Images](images.md): published container images, tags and environment variables.
-- [Deployment](deployment.md): self-hosting on Kubernetes with a Cloudflare Worker.
-- [Releasing](releasing.md): cutting a version and what the release workflow does.
 - [About](about.md): who built it.
