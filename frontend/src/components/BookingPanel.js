@@ -125,12 +125,6 @@ export function useBooking(event, onBooked, restoreRef) {
   };
 }
 
-const HOW = [
-  ['ticket', 'Tickets are general admission for the fixture; there is no seat choice.'],
-  ['check', 'Your reservation confirms instantly with a reference like USH-4F2A.'],
-  ['calendar', 'Changed your mind? Cancel it from My tickets before kick-off.'],
-];
-
 const CAP_MESSAGE = 'No more tickets available for this fixture.';
 
 const ticketsOf = (n) => (n === 1 ? 'ticket' : 'tickets');
@@ -230,26 +224,8 @@ export default function BookingPanel({ event, booking, headingId, onDone }) {
       <div className="booking__stack" key="empty">
         <h2 id={hid} className="booking__title">Book tickets</h2>
         <p className="booking__prompt">Choose a fixture to see prices and pick your tickets.</p>
-        <section className="booking__how" aria-labelledby={`${hid}-how`}>
-          <h3 id={`${hid}-how`} className="booking__how-title">How it works</h3>
-          <ul className="booking__how-list">
-            {HOW.map(([icon, text]) => (
-              <li key={icon}>
-                <Icon name={icon} size={16} />
-                <span>{text}</span>
-              </li>
-            ))}
-          </ul>
-          <Link className="booking__help" to="/help#booking">More help</Link>
-        </section>
-        <ul className="booking__types">
-          {TICKET_TYPES.map((t) => (
-            <li key={t.type}>
-              <span className="booking__line-name">{t.label}</span>
-              <span className="booking__line-note">{t.note}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="booking__note">General admission, instant reference, cancel before kick-off.</p>
+        <Link className="booking__help" to="/help#booking">More help</Link>
       </div>
     );
   } else {

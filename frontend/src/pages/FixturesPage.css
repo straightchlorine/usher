@@ -1,6 +1,6 @@
 .fixtures {
-  /* .shell__main owns the horizontal gutter and max-width. */
-  padding: var(--space-6) 0 56px;
+  /* .shell__main owns the gutter, max-width and top offset. */
+  padding: 0 0 56px;
 }
 
 .fixtures h1:focus {

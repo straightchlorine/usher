@@ -5,7 +5,7 @@ import BookingPanel, { BookingSheet, totals, useBooking } from '../components/Bo
 import FixtureCard from '../components/FixtureCard';
 import { Button, EmptyState, ErrorState, Field, Icon } from '../components/ui';
 import { eur, inWindow, splitFixture } from '../lib/format';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import './FixturesPage.css';
 
 // Below this width the booking panel is a bottom sheet behind a summary bar.
@@ -103,7 +103,7 @@ function Skeletons() {
 }
 
 export default function FixturesPage() {
-  usePageTitle('Fixtures');
+  usePageMeta('home');
   const narrow = useNarrow();
   const headingId = useId();
   const moreId = useId();
@@ -205,16 +205,19 @@ export default function FixturesPage() {
 
   // Select the fixture named in ?fixture=, else the one saved before a sign-in
   // detour, if it is still on sale. Runs once, when the list first loads.
+  // On desktop with neither, the soonest bookable fixture is preselected.
   useEffect(() => {
     if (initDone || status !== 'ready') return;
     const linked = params.get('fixture');
     const saved = restoreRef.current;
     const wanted = linked ?? (saved ? String(saved.eventId) : null);
-    const ev = wanted ? upcoming.find((e) => String(e.id) === wanted) : null;
+    let ev = wanted ? upcoming.find((e) => String(e.id) === wanted) : null;
+    // Desktop with nothing chosen yet: open the dock on the soonest bookable fixture.
+    if (!wanted && !narrow) ev = upcoming.find((e) => e.available_tickets > 0) || null;
     if (ev && ev.available_tickets > 0) setSelectedId(ev.id);
     else restoreRef.current = null;
     setInitDone(true);
-  }, [status, upcoming, initDone, params]);
+  }, [status, upcoming, initDone, params, narrow]);
 
   // Reflect the selection in the URL so a fixture can be linked to.
   useEffect(() => {

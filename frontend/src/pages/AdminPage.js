@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import AdminFixtures from './admin/AdminFixtures';
 import AdminVenues from './admin/AdminVenues';
 import AdminReservations from './admin/AdminReservations';
@@ -13,7 +13,7 @@ const TABS = [
 ];
 
 export default function AdminPage() {
-  usePageTitle('Admin');
+  usePageMeta('admin');
   const [message, setMessage] = useState('');
   // Sub-pages report outcomes here so one polite live region announces them all.
   const announce = useCallback((text) => setMessage(text), []);

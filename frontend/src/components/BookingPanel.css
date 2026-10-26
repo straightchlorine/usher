@@ -50,54 +50,9 @@
   font-size: var(--text-15);
 }
 
-.booking__how {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.booking__how-title {
+.booking__note {
   font-size: var(--text-14);
-  font-weight: 700;
-}
-
-.booking__how-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.booking__how-list li {
-  display: flex;
-  gap: var(--space-2);
-  align-items: flex-start;
-  font-size: var(--text-14);
-  line-height: 1.4;
   color: var(--muted);
-}
-
-.booking__how-list .icon {
-  flex: none;
-  margin-top: 2px;
-}
-
-.booking__types {
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.booking__types li {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--border);
 }
 
 .booking__fixture {

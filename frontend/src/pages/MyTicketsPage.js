@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cancelReservation, errorMessage, getMyReservations } from '../api';
 import { Button, EmptyState, ErrorState, LinkButton, Matchup, StatusPill } from '../components/ui';
 import { TICKET_TYPES, dateLine, eur, reservationRef } from '../lib/format';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import './MyTicketsPage.css';
 
 const isActive = (r) => r.status === 'CONFIRMED' || r.status === 'PENDING';
@@ -149,7 +149,7 @@ function Skeletons() {
 }
 
 export default function MyTicketsPage() {
-  usePageTitle('My tickets');
+  usePageMeta('tickets');
   const [reservations, setReservations] = useState(null);
   const [error, setError] = useState('');
   const [announcement, setAnnouncement] = useState('');
@@ -225,6 +225,9 @@ export default function MyTicketsPage() {
             ) : (
               <p className="tickets__none">No upcoming fixtures. Browse fixtures to reserve tickets.</p>
             )}
+            <LinkButton to="/" variant="quiet" className="tickets__more">
+              Book another match
+            </LinkButton>
           </section>
           {past.length > 0 && (
             <section className="tickets__section" aria-labelledby="tickets-past">
