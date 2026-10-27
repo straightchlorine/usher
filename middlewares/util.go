@@ -1,8 +1,6 @@
 package middlewares
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -26,18 +24,8 @@ func getEnvAsInt(key string, defaultValue int) (int, error) {
 	return value, nil
 }
 
-// Create a random 32-byte secret and encode it in Base64.
-func generateRandomSecret() (string, error) {
-	secret := make([]byte, 32)
-	_, err := rand.Read(secret)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate random secret: %v", err)
-	}
-	return base64.StdEncoding.EncodeToString(secret), nil
-}
-
 // Creates a JWT token with user claims.
-func GenerateJWT(userID string, role string, secret string) (string, int64, error) {
+func GenerateJWT(userID string, username string, role string, secret string) (string, int64, error) {
 	// get the token validity duration from env variable, otherwise 24 hours
 	validHours, err := getEnvAsInt("TOKEN_VALID_HOURS", 24)
 	if err != nil {
@@ -48,9 +36,10 @@ func GenerateJWT(userID string, role string, secret string) (string, int64, erro
 
 	// generate the claims
 	claims := jwt.MapClaims{
-		"userID": userID,
-		"role":   role,
-		"exp":    expirationTime,
+		"userID":   userID,
+		"username": username,
+		"role":     role,
+		"exp":      expirationTime,
 	}
 
 	// create the JWT token
@@ -74,22 +63,11 @@ func ValidateJWT(tokenString string, secret string) (*jwt.Token, error) {
 	})
 }
 
-// Initialize JWT secret from the environment or generate one as fallback
+// Read the JWT secret from the environment; refuse to start without one.
 func InitJWTSecret() string {
-	// check if the secret is set in the environment
 	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret != "" {
-		return jwtSecret
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET is not set; set it to a long random string before starting the API")
 	}
-
-	// generate a random secret if none is set
-	randomSecret, err := generateRandomSecret()
-	if err != nil {
-		log.Fatalf("Failed to generate random JWT secret: %v", err)
-	}
-
-	log.Println(
-		"WARNING: JWT_SECRET not set. Generating a random secret. Tokens will not be consistent across restarts.",
-	)
-	return randomSecret
+	return jwtSecret
 }

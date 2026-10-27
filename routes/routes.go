@@ -30,7 +30,9 @@ func SetupRoutes(pool *pgxpool.Pool, jwtSecret string) *mux.Router {
 }
 
 func setupPublicRoutes(r *mux.Router, pool *pgxpool.Pool, jwtSecret string) {
+	r.HandleFunc("/api/health", handlers.HealthHandler(pool)).Methods(http.MethodGet)
 	r.HandleFunc("/api/login", handlers.LoginHandler(pool, jwtSecret)).Methods(http.MethodPost)
+	r.HandleFunc("/api/register", handlers.RegisterHandler(pool)).Methods(http.MethodPost)
 	r.HandleFunc("/api/logout", handlers.LogoutHandler(pool, jwtSecret)).Methods(http.MethodPost)
 
 	r.HandleFunc("/api/events", handlers.GetEventsHandler(pool)).Methods(http.MethodGet)
