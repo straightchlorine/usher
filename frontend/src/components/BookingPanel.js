@@ -9,6 +9,8 @@ import './BookingPanel.css';
 const EMPTY_QTY = { STANDARD: 0, STUDENT: 0, SENIOR: 0 };
 const START_QTY = { ...EMPTY_QTY, STANDARD: 1 };
 
+const DEMO_NOTE = 'Demo: no payment is taken. It confirms instantly; cancel before kick-off in My tickets.';
+
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 function shortDate(iso) {
@@ -192,7 +194,7 @@ function Summary({ event }) {
   );
 }
 
-export default function BookingPanel({ event, booking, headingId, onDone }) {
+export default function BookingPanel({ event, booking, headingId, onDone, note }) {
   const autoId = useId();
   const hid = headingId || autoId;
   const confirmRef = useRef(null);
@@ -235,6 +237,7 @@ export default function BookingPanel({ event, booking, headingId, onDone }) {
     body = (
       <div className="booking__stack" key={event.id}>
         <h2 id={hid} className="booking__title" tabIndex={-1}>Book tickets</h2>
+        {note && <p className="booking__hint">{note}</p>}
         <Summary event={event} />
         {phase === 'signin' ? (
           <div className="booking__signin">
@@ -249,7 +252,7 @@ export default function BookingPanel({ event, booking, headingId, onDone }) {
               <Link to="/login" state={{ from: '/' }}>Sign in with your account</Link>
               <Link to="/register" state={{ from: '/' }}>Create an account</Link>
             </div>
-            <Button variant="quiet" onClick={booking.backToTickets} disabled={busy}>Back to tickets</Button>
+            <Button variant="quiet" onClick={booking.backToTickets} disabled={busy}>Back to ticket choice</Button>
           </div>
         ) : (
           <>
@@ -282,13 +285,13 @@ export default function BookingPanel({ event, booking, headingId, onDone }) {
                 {none ? 'Choose at least one ticket' : `Reserve ${plural(count, 'ticket')}`}
               </Button>
               {error && <p className="booking__error" role="alert">{error}</p>}
-              <p className="booking__demo">Demo: no payment is taken and the reservation confirms instantly.</p>
+              <p className="booking__demo">{DEMO_NOTE}</p>
             </div>
           </>
         )}
         {phase === 'signin' && error && <p className="booking__error" role="alert">{error}</p>}
         {phase === 'signin' && (
-          <p className="booking__demo">Demo: no payment is taken and the reservation confirms instantly.</p>
+          <p className="booking__demo">{DEMO_NOTE}</p>
         )}
       </div>
     );

@@ -168,7 +168,7 @@
 }
 
 .booking__amount {
-  font-size: 40px;
+  font-size: 32px;
   font-weight: 800;
   line-height: 1;
 }
@@ -183,6 +183,21 @@
   font-size: var(--text-14);
   font-weight: 500;
   color: var(--danger);
+}
+
+.booking__hint {
+  margin: calc(var(--space-3) * -1) 0 0;
+  font-size: var(--text-14);
+  color: var(--muted);
+}
+
+.booking__hint .btn {
+  min-height: 0;
+  padding: 0 var(--space-1);
+  font-size: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .booking__demo {

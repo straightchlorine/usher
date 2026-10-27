@@ -29,6 +29,16 @@
   color: var(--muted);
 }
 
+.fixtures__notice {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  font-size: var(--text-15);
+  font-weight: 500;
+}
+
 .fixtures__filters {
   display: flex;
   flex-wrap: wrap;

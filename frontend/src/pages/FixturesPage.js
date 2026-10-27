@@ -124,6 +124,8 @@ export default function FixturesPage() {
   const [params, setParams] = useSearchParams();
   const [initDone, setInitDone] = useState(false);
   const [announce, setAnnounce] = useState('');
+  const [autoPicked, setAutoPicked] = useState(false);
+  const [linkNotice, setLinkNotice] = useState('');
   const prevFilters = useRef(NO_FILTERS);
   const visibleCount = useRef(0);
 
@@ -214,8 +216,13 @@ export default function FixturesPage() {
     let ev = wanted ? upcoming.find((e) => String(e.id) === wanted) : null;
     // Desktop with nothing chosen yet: open the dock on the soonest bookable fixture.
     if (!wanted && !narrow) ev = upcoming.find((e) => e.available_tickets > 0) || null;
-    if (ev && ev.available_tickets > 0) setSelectedId(ev.id);
-    else restoreRef.current = null;
+    if (ev && ev.available_tickets > 0) {
+      setSelectedId(ev.id);
+      if (!wanted) setAutoPicked(true);
+    } else {
+      restoreRef.current = null;
+      if (linked) setLinkNotice(ev ? 'That fixture is sold out.' : 'That fixture is no longer on sale.');
+    }
     setInitDone(true);
   }, [status, upcoming, initDone, params, narrow]);
 
@@ -286,6 +293,8 @@ export default function FixturesPage() {
     const parts = fx ? splitFixture(fx.name) : null;
     const label = parts ? `${parts.home} vs ${parts.away}` : fx?.name || 'Fixture';
     focusDock.current = !narrow && ev?.detail === 0;
+    setAutoPicked(false);
+    setLinkNotice('');
     setAnnounce(`${label} selected. Choose your tickets in the booking panel.`);
     setSelectedId(id);
     if (narrow) setSheetOpen(true);
@@ -299,7 +308,19 @@ export default function FixturesPage() {
   }, [selectedId, headingId]);
 
   const showBar = narrow && selected;
-  const panel = <BookingPanel event={selected} booking={booking} headingId={headingId} onDone={done} />;
+  const hiddenByFilters = Boolean(selected) && !visible.some((e) => e.id === selected.id);
+  let panelNote = null;
+  if (hiddenByFilters) {
+    panelNote = (
+      <>
+        This fixture is hidden by your filters.{' '}
+        <Button variant="quiet" onClick={clear}>Clear filters</Button>
+      </>
+    );
+  } else if (autoPicked && !narrow) {
+    panelNote = 'Soonest fixture selected.';
+  }
+  const panel = <BookingPanel event={selected} booking={booking} headingId={headingId} onDone={done} note={panelNote} />;
   const groups = useMemo(() => groupByWeek(visible), [visible]);
   const filterCount = (filters.when !== 'all') + (filters.venue !== 'all') + (filters.hideSold ? 1 : 0) + (filters.sort !== 'soon');
 
@@ -422,6 +443,7 @@ export default function FixturesPage() {
 
       <div className="fixtures__body">
         <section className="fixtures__list" aria-label="Fixture list">
+          {linkNotice && <p className="fixtures__notice" role="status">{linkNotice}</p>}
           {list}
         </section>
         {!narrow && <aside className="fixtures__dock" aria-label="Book tickets" ref={dockRef}>{panel}</aside>}

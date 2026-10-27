@@ -55,7 +55,7 @@ const LINKS = [
   {
     href: "https://docs.usher.piotrkrzysztof.dev",
     title: "Documentation",
-    note: "How Usher is built and ran",
+    note: "How Usher is built and run",
   },
   {
     href: "https://github.com/straightchlorine/usher",
@@ -111,7 +111,7 @@ export default function AboutPage() {
       </p>
       <p>
         It is a Go API with a React front end, deployed on k3s and served
-        through a Cloudflare Worker. It's an university project, revived as a
+        through a Cloudflare Worker. It's a university project, revived as a
         working demo.
       </p>
 
