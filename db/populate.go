@@ -2,8 +2,9 @@ package db
 
 import (
 	"context"
+	"log"
+	"math"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -11,8 +12,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
-
-	"github.com/straightchlorine/usher/models"
 )
 
 // Fetch the IDs of existing records from given table.
@@ -63,9 +62,13 @@ func AddAdminUser(fake *gofakeit.Faker, pool *pgxpool.Pool) error {
 	root_password := os.Getenv("ROOT_PASSWORD")
 	root_username := os.Getenv("ROOT_NAME")
 
-	// if not provided, go with root
+	// no password, no admin: there is no safe default
 	if root_password == "" {
-		root_password = "root"
+		log.Println("ROOT_PASSWORD is not set; no admin account was created")
+		if pool != nil {
+			return EnsureDemoUser(context.Background(), pool)
+		}
+		return nil
 	}
 	if root_username == "" {
 		root_username = "root"
@@ -100,9 +103,9 @@ func AddAdminUser(fake *gofakeit.Faker, pool *pgxpool.Pool) error {
 
 	// in case nil is passed, populating is off, so run regular insert
 	if pool != nil {
-		_, err := pool.Query(
+		_, err := pool.Exec(
 			context.Background(),
-			query,
+			query+" ON CONFLICT DO NOTHING",
 			root_user.Name,
 			root_user.Surname,
 			root_user.Username,
@@ -115,8 +118,50 @@ func AddAdminUser(fake *gofakeit.Faker, pool *pgxpool.Pool) error {
 			return err
 		}
 
+		return EnsureDemoUser(context.Background(), pool)
 	}
 	return nil
+}
+
+// EnsureDemoUser makes sure the demo fan account exists. It does nothing if the
+// username is already taken, so it is safe to run on every startup. It is
+// skipped when DEMO_PASSWORD is empty.
+func EnsureDemoUser(ctx context.Context, pool *pgxpool.Pool) error {
+	username := os.Getenv("DEMO_USERNAME")
+	password := os.Getenv("DEMO_PASSWORD")
+	if password == "" {
+		return nil
+	}
+	if username == "" {
+		username = "demo"
+	}
+
+	var exists bool
+	if err := pool.QueryRow(
+		ctx, "SELECT EXISTS (SELECT 1 FROM Users WHERE username = $1)", username,
+	).Scan(&exists); err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// ON CONFLICT covers a taken email, or a concurrent startup racing this check
+	_, err = pool.Exec(
+		ctx, `
+		INSERT INTO Users (name, surname, username, email, password_hash,
+											 role_id, is_active, last_login, created_at)
+		VALUES ('Demo', 'Fan', $1, 'demo@usher.example', $2,
+						(SELECT id FROM Roles WHERE name = 'REGISTERED'), TRUE, NOW(), NOW())
+		ON CONFLICT DO NOTHING`,
+		username, string(passwordHash),
+	)
+	return err
 }
 
 type UserPopulate struct {
@@ -179,12 +224,6 @@ func populateUsers(ctx context.Context, pool *pgxpool.Pool) error {
 		)
 	}
 
-	// if possible, take advantage of the batch request
-	err := AddAdminUser(fake, pool)
-	if err != nil {
-		return err
-	}
-
 	// send the batch
 	br := pool.SendBatch(ctx, batch)
 	defer br.Close()
@@ -193,43 +232,55 @@ func populateUsers(ctx context.Context, pool *pgxpool.Pool) error {
 	return nil
 }
 
-// Populate the database with fake location records.
+type venue struct {
+	Stadium  string
+	Address  string
+	Country  string
+	Capacity int
+}
+
+// Fictional football venues.
+var venues = []venue{
+	{"Kestrel Park", "12 Kestrel Road, Northbridge", "England", 32000},
+	{"Quayside Stadium", "1 Quay Street, Harbour City", "England", 41000},
+	{"Moor Road", "Moor Road, St. Aubin", "England", 18500},
+	{"Valley Park", "Valley Park Way, Abercwm", "Wales", 22000},
+	{"The Wharf", "Wharf Lane, Castleford", "England", 15000},
+	{"Ellis Lane", "Ellis Lane, Port Ellis", "England", 12500},
+	{"Redmarsh Park", "Marsh Avenue, Redmarsh", "Scotland", 24000},
+	{"Vale Ground", "Vale Road, Albion", "England", 16000},
+}
+
+type club struct {
+	Name  string
+	Venue string
+}
+
+// Fictional clubs and their home venues (index matches venues).
+var clubs = []club{
+	{"Northbridge", "Kestrel Park"},
+	{"Harbour City", "Quayside Stadium"},
+	{"St. Aubin", "Moor Road"},
+	{"Valley Rovers", "Valley Park"},
+	{"Castleford Town", "The Wharf"},
+	{"Port Ellis", "Ellis Lane"},
+	{"Redmarsh", "Redmarsh Park"},
+	{"Albion Vale", "Vale Ground"},
+}
+
+// Populate the database with the fictional football venues.
 func populateLocations(ctx context.Context, pool *pgxpool.Pool) error {
-	fake := gofakeit.New(0)
-
-	// locations struct
-	locations := make([]models.CreateLocationRequest, 20)
-
-	// batch insert
 	batch := &pgx.Batch{}
-
-	// fill the struct with fake data
-	for i := range locations {
-		fake_stadium := fake.NounCollectiveThing()
-
-		locations[i] = models.CreateLocationRequest{
-			Stadium:  strings.ToUpper(string(fake_stadium[0])) + fake_stadium[1:],
-			Address:  fake.Address().Address,
-			Country:  fake.Country(),
-			Capacity: fake.Number(5000, 80000),
-		}
-
+	for _, v := range venues {
 		batch.Queue(
 			`INSERT INTO Locations (stadium, address, country, capacity)
         VALUES ($1, $2, $3, $4)`,
-			locations[i].Stadium,
-			locations[i].Address,
-			locations[i].Country,
-			locations[i].Capacity,
+			v.Stadium, v.Address, v.Country, v.Capacity,
 		)
 	}
 
-	// send the batch
 	br := pool.SendBatch(ctx, batch)
-	defer br.Close()
-
-	// return nil if no errors
-	return nil
+	return br.Close()
 }
 
 type EventPopulate struct {
@@ -240,171 +291,332 @@ type EventPopulate struct {
 	LocationID       int       `json:"location_id"`
 }
 
-// Populate the database with fake event records.
-func populateEvents(ctx context.Context, pool *pgxpool.Pool) error {
-	fake := gofakeit.New(0)
+// Next occurrence of the weekday strictly after today, at the given time, in UTC.
+func nextWeekday(now time.Time, day time.Weekday, hour, min, weeksAhead int) time.Time {
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	delta := (int(day)-int(today.Weekday())+6)%7 + 1
+	d := today.AddDate(0, 0, delta+7*weeksAhead)
+	return time.Date(d.Year(), d.Month(), d.Day(), hour, min, 0, 0, time.UTC)
+}
 
-	// get existing location ids
-	locationIDs := fetchIds(ctx, pool, "Locations")
+// Build the 16 football fixtures: every club hosts two, spread over the next 5 weeks.
+func buildFixtures(now time.Time, locationIDs map[string]int) []EventPopulate {
+	// five slots per week: Sat 15:00, Sat 17:30, Sun 14:00, Sun 16:30, Wed 19:45
+	type slot struct {
+		day        time.Weekday
+		hour, mins int
+	}
+	slots := []slot{
+		{time.Saturday, 15, 0},
+		{time.Saturday, 17, 30},
+		{time.Sunday, 14, 0},
+		{time.Sunday, 16, 30},
+		{time.Wednesday, 19, 45},
+	}
 
-	// event struct
-	events := make([]EventPopulate, 20)
+	// fixed ticket counts for a few fixtures: nearly gone, almost gone, sold out
+	special := map[int]int{5: 37, 9: 12, 13: 0}
 
-	// batch insert
-	batch := &pgx.Batch{}
+	const total = 16
+	events := make([]EventPopulate, 0, total)
+	for i := range total {
+		home := clubs[i%len(clubs)]
+		offset := 1
+		if i >= len(clubs) {
+			offset = 3
+		}
+		away := clubs[(i%len(clubs)+offset)%len(clubs)]
 
-	// fill the struct with fake data
-	for i := range events {
-		events[i] = EventPopulate{
-			Name:             fake.Country() + "-" + fake.Country(),
-			Date:             fake.FutureDate(),
-			Price:            fake.Price(10, 1000),
-			LocationID:       locationIDs[i%len(locationIDs)],
-			AvailableTickets: fake.Number(1000, 50000),
+		// pick 16 of the 25 slots, evenly spread
+		idx := i * 25 / total
+		sl := slots[idx%len(slots)]
+		date := nextWeekday(now, sl.day, sl.hour, sl.mins, idx/len(slots))
+
+		tickets, ok := special[i]
+		if !ok {
+			tickets = 400 + (i*337)%2601
 		}
 
-		// fill the batch with requests
+		events = append(events, EventPopulate{
+			Name:             home.Name + " vs " + away.Name,
+			Date:             date,
+			Price:            28 + float64((i*173)%55)/2, // whole euros or .50, 28-55
+			LocationID:       locationIDs[home.Venue],
+			AvailableTickets: tickets,
+		})
+	}
+	return events
+}
+
+// Populate the database with the football fixtures.
+func populateEvents(ctx context.Context, pool *pgxpool.Pool) error {
+	// map venue names onto their location ids
+	locationIDs := map[string]int{}
+	rows, err := pool.Query(ctx, "SELECT id, stadium FROM Locations")
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var id int
+		var stadium string
+		if err := rows.Scan(&id, &stadium); err != nil {
+			rows.Close()
+			return err
+		}
+		locationIDs[stadium] = id
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	batch := &pgx.Batch{}
+	for _, e := range buildFixtures(time.Now(), locationIDs) {
 		batch.Queue(
 			`INSERT INTO Events (name, date, price, location_id, available_tickets)
         VALUES ($1, $2, $3, $4, $5)`,
-			events[i].Name,
-			events[i].Date,
-			events[i].Price,
-			events[i].LocationID,
-			events[i].AvailableTickets,
+			e.Name, e.Date, e.Price, e.LocationID, e.AvailableTickets,
 		)
 	}
 
-	// send the batch
 	br := pool.SendBatch(ctx, batch)
-	defer br.Close()
-
-	// return nil if no errors
-	return nil
+	return br.Close()
 }
 
-type ReservationPopulate struct {
-	ID           uuid.UUID `json:"id"`
-	UserID       uuid.UUID `json:"user_id"`
-	EventID      int       `json:"event_id"`
-	CreatedAt    time.Time `json:"created_at"`
-	TotalTickets int       `json:"total_tickets"`
-	StatusID     int       `json:"status_id"`
+// Ticket price multiplier per ticket type (1 - discount).
+var ticketMultipliers = map[string]float64{
+	"STANDARD": 1,
+	"STUDENT":  0.8,
+	"SENIOR":   0.85,
 }
 
-// Populate the database with fake reservations.
+// Cents-rounded ticket price for an event base price and ticket type.
+func ticketPrice(base float64, ticketType string) float64 {
+	return math.Round(base*ticketMultipliers[ticketType]*100) / 100
+}
+
+// Populate the database with fake reservations and matching tickets. Root and
+// demo users are never given random reservations.
 func populateReservations(ctx context.Context, pool *pgxpool.Pool) error {
 	fake := gofakeit.New(0)
 
-	// fetch user ids
-	userIDs := fetchUUIDIds(ctx, pool, "Users")
-
-	// fetch event ids
-	eventIDs := fetchIds(ctx, pool, "Events")
-
-	// fetch status ids
-	statusIDs := fetchIds(ctx, pool, "reservation_statuses")
-
-	// reservation struct
-	reservations := make([]ReservationPopulate, 100)
-
-	// batch insert
-	batch := &pgx.Batch{}
-
-	// fill the struct with fake data
-	for i := range reservations {
-
-		// fill the struct
-		reservations[i] = ReservationPopulate{
-			UserID:       userIDs[i%len(userIDs)],
-			EventID:      eventIDs[i%len(eventIDs)],
-			CreatedAt:    fake.PastDate(),
-			TotalTickets: fake.Number(1, 10),
-			StatusID:     statusIDs[i%len(statusIDs)],
-		}
-
-		// fill the batch with requests
-		batch.Queue(
-			`INSERT INTO Reservations (user_id, event_id, created_at, total_tickets, status_id)
-        VALUES ($1, $2, $3, $4, $5)`,
-			reservations[i].UserID,
-			reservations[i].EventID,
-			reservations[i].CreatedAt,
-			reservations[i].TotalTickets,
-			reservations[i].StatusID,
-		)
+	rootName := os.Getenv("ROOT_NAME")
+	if rootName == "" {
+		rootName = "root"
+	}
+	demoName := os.Getenv("DEMO_USERNAME")
+	if demoName == "" {
+		demoName = "demo"
 	}
 
-	// send the batch
-	br := pool.SendBatch(ctx, batch)
-	defer br.Close()
-
-	// return nil if no errors
-	return nil
-}
-
-type TicketPopulate struct {
-	ID            int       `json:"id"`
-	ReservationID uuid.UUID `json:"reservation_id"`
-	Price         float64   `json:"price"`
-	TypeID        int       `json:"type_id"`
-	StatusID      int       `json:"status_id"`
-}
-
-// Populate the database with fake tickets.
-func populateTickets(ctx context.Context, pool *pgxpool.Pool) error {
-	fake := gofakeit.New(0)
-
-	// ticket struct
-	tickets := make([]TicketPopulate, 100)
-
-	// fetch reservation ids
-	reservationIDs := fetchUUIDIds(ctx, pool, "Reservations")
-
-	// fetch ticket type ids
-	ticketTypeIDs := fetchIds(ctx, pool, "ticket_types")
-
-	// fetch ticket status ids
-	ticketStatusIDs := fetchIds(ctx, pool, "ticket_statuses")
-
-	// batch insert
-	batch := &pgx.Batch{}
-
-	// fill the struct with fake data
-	for i := range tickets {
-
-		// fill the struct
-		tickets[i] = TicketPopulate{
-			ReservationID: reservationIDs[i%len(reservationIDs)],
-			Price:         fake.Price(10, 1000),
-			TypeID:        ticketTypeIDs[i%len(ticketTypeIDs)],
-			StatusID:      ticketStatusIDs[i%len(ticketStatusIDs)],
+	var userIDs []uuid.UUID
+	rows, err := pool.Query(ctx, "SELECT id FROM Users WHERE username NOT IN ($1, $2)", rootName, demoName)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
 		}
-
-		// fill the batch with requests
-		batch.Queue(
-			`INSERT INTO Tickets (reservation_id, price, type_id, status_id)
-        VALUES ($1, $2, $3, $4)`,
-			tickets[i].ReservationID,
-			tickets[i].Price,
-			tickets[i].TypeID,
-			tickets[i].StatusID,
-		)
+		userIDs = append(userIDs, id)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	if len(userIDs) == 0 {
+		return nil
 	}
 
-	// send the batch
-	br := pool.SendBatch(ctx, batch)
-	defer br.Close()
+	type eventInfo struct {
+		id        int
+		price     float64
+		available int
+	}
+	var events []eventInfo
+	rows, err = pool.Query(ctx, "SELECT id, price::float8, available_tickets FROM Events ORDER BY id")
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var e eventInfo
+		if err := rows.Scan(&e.id, &e.price, &e.available); err != nil {
+			rows.Close()
+			return err
+		}
+		events = append(events, e)
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	if len(events) == 0 {
+		return nil
+	}
 
-	// return nil if no errors
-	return nil
+	// reservation status -> ticket status
+	statuses := []struct{ res, ticket string }{
+		{"CONFIRMED", "SOLD"},
+		{"PENDING", "RESERVED"},
+		{"CANCELLED", "CANCELLED"},
+	}
+	typeNames := []string{"STANDARD", "STUDENT", "SENIOR"}
+
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	for i := range 100 {
+		ev := &events[i%len(events)]
+		st := statuses[i%len(statuses)]
+		total := fake.Number(1, 10)
+
+		// skip reservations that would oversell the fixture
+		if st.res != "CANCELLED" && total > ev.available {
+			continue
+		}
+
+		var resID uuid.UUID
+		if err := tx.QueryRow(ctx, `
+			INSERT INTO Reservations (user_id, event_id, created_at, total_tickets, status_id)
+			VALUES ($1, $2, $3, $4, (SELECT id FROM reservation_statuses WHERE name = $5))
+			RETURNING id`,
+			userIDs[i%len(userIDs)], ev.id, fake.PastDate(), total, st.res,
+		).Scan(&resID); err != nil {
+			return err
+		}
+
+		for range total {
+			tn := typeNames[fake.Number(0, len(typeNames)-1)]
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO Tickets (reservation_id, price, type_id, status_id)
+				VALUES ($1, $2, (SELECT id FROM ticket_types WHERE name = $3),
+				        (SELECT id FROM ticket_statuses WHERE name = $4))`,
+				resID, ticketPrice(ev.price, tn), tn, st.ticket,
+			); err != nil {
+				return err
+			}
+		}
+
+		if st.res != "CANCELLED" {
+			if _, err := tx.Exec(ctx,
+				"UPDATE Events SET available_tickets = available_tickets - $1 WHERE id = $2 AND available_tickets >= $1",
+				total, ev.id); err != nil {
+				return err
+			}
+			ev.available -= total
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+// Give the demo fan one CONFIRMED reservation (2 STANDARD + 1 STUDENT, SOLD)
+// for the second-soonest fixture and one CANCELLED (1 STANDARD) on the fourth,
+// so My tickets shows both sections.
+func populateDemoReservation(ctx context.Context, pool *pgxpool.Pool) error {
+	if os.Getenv("DEMO_PASSWORD") == "" {
+		return nil
+	}
+	username := os.Getenv("DEMO_USERNAME")
+	if username == "" {
+		username = "demo"
+	}
+
+	var userID uuid.UUID
+	if err := pool.QueryRow(ctx, "SELECT id FROM Users WHERE username = $1", username).Scan(&userID); err != nil {
+		return err
+	}
+
+	var eventID int
+	var base float64
+	if err := pool.QueryRow(
+		ctx, "SELECT id, price::float8 FROM Events ORDER BY date ASC, id ASC OFFSET 1 LIMIT 1",
+	).Scan(&eventID, &base); err != nil {
+		return err
+	}
+
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var resID uuid.UUID
+	if err := tx.QueryRow(ctx, `
+		INSERT INTO Reservations (user_id, event_id, total_tickets, status_id)
+		VALUES ($1, $2, 3, (SELECT id FROM reservation_statuses WHERE name = 'CONFIRMED'))
+		RETURNING id`, userID, eventID).Scan(&resID); err != nil {
+		return err
+	}
+
+	// price = base * (1 - discount), rounded to cents
+	for _, t := range []string{"STANDARD", "STANDARD", "STUDENT"} {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO Tickets (reservation_id, price, type_id, status_id)
+			SELECT $1, ROUND($2::numeric * (1 - tt.discount), 2), tt.id,
+			       (SELECT id FROM ticket_statuses WHERE name = 'SOLD')
+			FROM ticket_types tt WHERE tt.name = $3`, resID, base, t); err != nil {
+			return err
+		}
+	}
+
+	if _, err := tx.Exec(ctx,
+		"UPDATE Events SET available_tickets = available_tickets - 3 WHERE id = $1 AND available_tickets >= 3",
+		eventID); err != nil {
+		return err
+	}
+
+	// second reservation: CANCELLED, 1 STANDARD on a later fixture (availability untouched)
+	var laterID int
+	var laterBase float64
+	if err := tx.QueryRow(
+		ctx, "SELECT id, price::float8 FROM Events ORDER BY date ASC, id ASC OFFSET 3 LIMIT 1",
+	).Scan(&laterID, &laterBase); err != nil {
+		return err
+	}
+	if err := tx.QueryRow(ctx, `
+		INSERT INTO Reservations (user_id, event_id, total_tickets, status_id)
+		VALUES ($1, $2, 1, (SELECT id FROM reservation_statuses WHERE name = 'CANCELLED'))
+		RETURNING id`, userID, laterID).Scan(&resID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO Tickets (reservation_id, price, type_id, status_id)
+		SELECT $1, ROUND($2::numeric * (1 - tt.discount), 2), tt.id,
+		       (SELECT id FROM ticket_statuses WHERE name = 'CANCELLED')
+		FROM ticket_types tt WHERE tt.name = 'STANDARD'`, resID, laterBase); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 // Populate the database with fake data.
 func PopulateDatabase(pool *pgxpool.Pool) error {
-	// conte  // context with timeout
+	// context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
+
+	// root admin and demo user must exist on every run (AddAdminUser also ensures the demo user)
+	if err := AddAdminUser(nil, pool); err != nil {
+		return err
+	}
+	if err := EnsureDemoUser(ctx, pool); err != nil {
+		return err
+	}
+
+	// skip seeding when fixtures exist, so restarts (--populate on every start) do not duplicate data
+	var count int
+	if err := pool.QueryRow(ctx, "SELECT COUNT(*) FROM Events").Scan(&count); err != nil {
+		return err
+	}
+	if count > 0 {
+		log.Printf("populate: events table already has %d rows, skipping seeding", count)
+		return nil
+	}
 
 	// group the functions in appropriate order
 	populationFuncs := []func(context.Context, *pgxpool.Pool) error{
@@ -412,7 +624,7 @@ func PopulateDatabase(pool *pgxpool.Pool) error {
 		populateLocations,
 		populateEvents,
 		populateReservations,
-		populateTickets,
+		populateDemoReservation,
 	}
 
 	// populate the database

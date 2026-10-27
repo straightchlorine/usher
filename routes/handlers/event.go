@@ -394,6 +394,11 @@ func UpdateEventHandler(pool *pgxpool.Pool) http.HandlerFunc {
 //	@Router			/events/{id} [delete]
 func DeleteEventHandler(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if !isAdmin(r) {
+			writeErrorResponse(w, http.StatusForbidden, "Insufficient permissions.")
+			return
+		}
+
 		vars := mux.Vars(r)
 		eventID, ok := vars["id"]
 		if !ok {

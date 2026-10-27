@@ -2,6 +2,8 @@ module github.com/straightchlorine/usher
 
 go 1.26.0
 
+toolchain go1.26.10
+
 require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
