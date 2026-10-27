@@ -194,6 +194,17 @@ jobs:
             PROXY_SHARED_SECRET
         env:
           PROXY_SHARED_SECRET: ${{ secrets.USHER_PROXY_KEY }}
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: |
+          HOST=usher.piotrkrzysztof.dev
+          KEY=90d810c25c630c45122515d81f668d80
+          sleep 15
+          urls=$(curl -fsS "https://$HOST/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's/<[^>]*>//g' | sed 's/.*/"&"/' | paste -sd, -)
+          curl -fsS -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            -d "{\"host\":\"$HOST\",\"key\":\"$KEY\",\"keyLocation\":\"https://$HOST/$KEY.txt\",\"urlList\":[$urls]}" \
+            -o /dev/null -w "indexnow: HTTP %{http_code}\n"
 
   github-release:
     needs: publish
