@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { Button } from './ui';
+import { Button, ExtLink } from './ui';
 import { errorMessage } from '../api';
 import './AppShell.css';
 
@@ -50,6 +50,18 @@ export default function AppShell({ children }) {
       <header className="shell__bar">
         <div className="shell__bar-inner">
           <Link className="shell__wordmark" to="/">
+            <svg className="shell__logo" width="28" height="28" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <defs>
+                <clipPath id="shell-logo-clip">
+                  <rect width="64" height="64" rx="14" />
+                </clipPath>
+              </defs>
+              <rect className="shell__logo-bg" width="64" height="64" rx="14" />
+              <g clipPath="url(#shell-logo-clip)">
+                <path className="shell__logo-cup" d="M19 10v18a13 13 0 0 0 26 0V10" />
+                <rect className="shell__logo-stripe" y="53" width="64" height="11" />
+              </g>
+            </svg>
             Usher
           </Link>
           <nav className="shell__nav" aria-label="Main">
@@ -61,6 +73,9 @@ export default function AppShell({ children }) {
             </NavLink>
             <NavLink to="/help" className="shell__link">
               Help
+            </NavLink>
+            <NavLink to="/about" className="shell__link">
+              About
             </NavLink>
             {isAdmin && (
               <NavLink to="/admin" className="shell__link">
@@ -105,12 +120,24 @@ export default function AppShell({ children }) {
         {children || <Outlet />}
       </main>
       <footer className="shell__footer">
-        <p>
-          Usher is a demo. No payments are taken; clubs and fixtures are fictional.{' '}
-          <Link className="shell__footer-link" to="/help">
-            Help
-          </Link>
-        </p>
+        <p>Usher is a demo. No payments are taken; clubs and fixtures are fictional.</p>
+        <nav className="shell__footer-nav" aria-label="Footer">
+          <ExtLink className="shell__footer-link" href="https://github.com/straightchlorine/usher">
+            Source
+          </ExtLink>
+          <ExtLink className="shell__footer-link" href="https://docs.usher.piotrkrzysztof.dev">
+            Docs
+          </ExtLink>
+          <ExtLink className="shell__footer-link" href="https://piotrkrzysztof.dev">
+            Piotr Krzysztof Lis
+          </ExtLink>
+          <ExtLink
+            className="shell__footer-link"
+            href="https://www.linkedin.com/in/jakub-kucharski-360811305/"
+          >
+            Jakub Kucharski
+          </ExtLink>
+        </nav>
       </footer>
     </div>
   );

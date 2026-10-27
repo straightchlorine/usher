@@ -47,6 +47,8 @@ jobs:
           fi
 
   publish:
+    # explicit name: without it GitHub lists every matrix value, "publish (api, ., Dockerfile, Usher API, ...)"
+    name: publish (${{ matrix.component }})
     needs: [ci, verify-tag]
     runs-on: ubuntu-latest
     timeout-minutes: 45

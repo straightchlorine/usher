@@ -1,18 +1,10 @@
 import React, { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { usePageTitle } from '../lib/usePageTitle';
+import { usePageMeta } from '../lib/usePageTitle';
 import './HelpPage.css';
 
-const SECTIONS = [
-  { id: 'demo', title: 'About this demo' },
-  { id: 'booking', title: 'Booking tickets' },
-  { id: 'reservations', title: 'Your reservation' },
-  { id: 'accounts', title: 'Accounts and passwords' },
-  { id: 'admin', title: 'Admin tools' },
-];
-
 export default function HelpPage() {
-  usePageTitle('Help');
+  usePageMeta('help');
   const { hash } = useLocation();
 
   useEffect(() => {
@@ -27,28 +19,13 @@ export default function HelpPage() {
         Usher is a demo for reserving football tickets. Here is how it works and what to expect.
       </p>
 
-      <nav className="help__toc" aria-label="On this page">
-        <ul>
-          {SECTIONS.map((s) => (
-            <li key={s.id}>
-              <a href={`#${s.id}`}>{s.title}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
       <section className="help__section" aria-labelledby="demo-title">
         <h2 id="demo" className="help__h2">
           <span id="demo-title">About this demo</span>
         </h2>
         <p>
-          Usher lets fans browse upcoming football fixtures, reserve tickets and manage them afterwards. It is a
-          portfolio project, built to be tried.
-        </p>
-        <p>No payment is taken. A reservation is confirmed as soon as you make it. Clubs and fixtures are fictional.</p>
-        <p>
-          The demo account is a ready-made fan account. Anyone can use it: choose Try the demo in the top bar, or
-          Continue with the demo account on the <Link to="/login">sign-in page</Link>.
+          No payment is taken and the clubs are fictional. Anyone can use the demo account from the top bar. Read{' '}
+          <Link to="/about">about Usher</Link> for the story behind it.
         </p>
       </section>
 
@@ -98,14 +75,11 @@ export default function HelpPage() {
         </p>
       </section>
 
-      <section className="help__section" aria-labelledby="admin-title">
+      <section className="help__section help__staff" aria-labelledby="admin-title">
         <h2 id="admin" className="help__h2">
-          <span id="admin-title">Admin tools</span>
+          <span id="admin-title">For staff</span>
         </h2>
-        <p>
-          Staff accounts get an Admin page in the top bar. There they manage fixtures, venues and every
-          reservation. Fan accounts do not see it.
-        </p>
+        <p>Staff accounts get an Admin page in the top bar to manage fixtures, venues and reservations.</p>
       </section>
     </div>
   );

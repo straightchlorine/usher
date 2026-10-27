@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://docs.usher.piotrkrzysztof.dev/sitemap.xml

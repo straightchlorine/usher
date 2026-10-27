@@ -1,0 +1,15 @@
+# Usher
+
+> Usher is a demo football ticket reservation app: browse fictional fixtures, pick Standard, Student or Senior tickets and reserve instantly. No payment is taken.
+
+- [Usher](https://usher.piotrkrzysztof.dev/): browse upcoming fictional fixtures and reserve tickets.
+- [Help](https://usher.piotrkrzysztof.dev/help): how booking, ticket types, reservations and accounts work.
+- [About](https://usher.piotrkrzysztof.dev/about): what Usher is, who built it and where to find the source.
+
+## Optional
+
+- [Source code](https://github.com/straightchlorine/usher): Go API and React front end.
+- [Documentation](https://docs.usher.piotrkrzysztof.dev): how Usher is built and run.
+- [Piotr's site](https://piotrkrzysztof.dev): more projects.
+- [Piotr Krzysztof Lis](https://github.com/straightchlorine): author (also [LinkedIn](https://www.linkedin.com/in/straightchlorine/)).
+- [Jakub Kucharski](https://github.com/kubson2002k): author (also [LinkedIn](https://www.linkedin.com/in/jakub-kucharski-360811305/)).

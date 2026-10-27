@@ -6,7 +6,7 @@ services:
     networks:
       - usher-network
     ports:
-      - "${DB_PORT:-5432}:${DB_PORT:-5432}"
+      - "${DB_HOST_PORT:-5432}:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       PGUSER: ${DB_USER:-postgres}
@@ -33,7 +33,7 @@ services:
     ports:
       - "${NC_DB_PORT:-8081}:${NC_DB_PORT:-8081}"
     environment:
-      - NC_DB=pg://${DB_HOST:-database}:${DB_PORT:-5432}?u=${NC_DB_USER:-nocodb}&p=${NC_DB_PASSWORD:-password}&d=${NC_DB_NAME:-nocodb_metadata}
+      - NC_DB=pg://${DB_HOST:-database}:5432?u=${NC_DB_USER:-nocodb}&p=${NC_DB_PASSWORD:-password}&d=${NC_DB_NAME:-nocodb_metadata}
       - NC_AUTH_JWT_SECRET=${NC_AUTH_JWT:-569a1821-0a93-45e8-87ab-eb857f20a010}
       - PORT=${NC_DB_PORT:-8081}
     depends_on:
@@ -53,7 +53,7 @@ services:
     ports:
       - "${API_PORT:-8080}:8080"
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@${DB_HOST:-database}:${DB_PORT:-5432}/${DB_NAME:-event_api}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@${DB_HOST:-database}:5432/${DB_NAME:-event_api}
       JWT_SECRET: ${API_JWT_SECRET:-803f6f39-fa46-4993-bbc0-f595e78f2aef}
       ROOT_NAME: ${API_ROOT_NAME:-root}
       ROOT_PASSWORD: ${API_ROOT_PASSWORD:-root}

@@ -1,0 +1,145 @@
+.about {
+  max-width: 68ch;
+  padding: 0 0 var(--space-7);
+}
+
+.about p,
+.about li {
+  font-size: var(--text-16);
+  line-height: 1.55;
+}
+
+.about p {
+  margin: 0 0 var(--space-3);
+}
+
+.about__title {
+  margin: 0 0 var(--space-3);
+}
+
+.about a {
+  color: var(--accent-text);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.about a:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.about__section {
+  margin-top: var(--space-6);
+}
+
+.about__h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-28);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.about__authors,
+.about__links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.about__author {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.about__name {
+  font-weight: 700;
+}
+
+.about__icons {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-1) var(--space-2);
+}
+
+.about .about__icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--ink);
+}
+
+.about .about__icon-link:hover {
+  background: var(--card);
+  outline: 1.5px solid var(--ink);
+}
+
+.about .about__icon-link:focus-visible,
+.about a:focus-visible {
+  outline: 3px solid var(--focus);
+}
+
+.about a .icon {
+  flex: none;
+}
+
+.about__link-item {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) 0;
+}
+
+.about__link-item a {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.about__note {
+  color: var(--muted);
+  font-size: var(--text-14);
+}
+
+.about__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.about .about__actions a {
+  color: var(--shell-text);
+}
+
+.about__error {
+  margin-top: var(--space-3);
+  color: var(--danger);
+  font-size: var(--text-14);
+  font-weight: 500;
+}
+
+@media (max-width: 639px) {
+  .about__author {
+    grid-template-columns: 1fr;
+  }
+
+
+  .about__h2 {
+    font-size: var(--text-20);
+  }
+}
+
+@media (max-width: 479px) {
+  .about__icons {
+    flex-wrap: wrap;
+  }
+}
