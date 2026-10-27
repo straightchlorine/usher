@@ -11,4 +11,4 @@ resources:
   - sealed-usher-api.yaml
 images:
   - name: ghcr.io/straightchlorine/usher/api
-    newTag: 1.0.0
+    newTag: 1.0.1
