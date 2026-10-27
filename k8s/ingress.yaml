@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: usher-api
+  namespace: usher
+  labels:
+    app: usher-api
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    # Traefik CRD refs are <namespace>-<name>@kubernetescrd.
+    traefik.ingress.kubernetes.io/router.middlewares: usher-usher-api-ratelimit@kubernetescrd,usher-usher-api-headers@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - usher-api.piotrkrzysztof.dev
+      secretName: usher-api-tls
+  rules:
+    - host: usher-api.piotrkrzysztof.dev
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: usher-api
+                port:
+                  number: 8080

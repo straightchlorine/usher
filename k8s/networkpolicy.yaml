@@ -1,0 +1,42 @@
+# kube-router default-deny side effect: a pod selected by any Egress policy is
+# denied everything not listed. Egress only; no Ingress policy, so Traefik
+# (kube-system) and Gatus keep reaching the pod.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: usher-egress
+  namespace: usher
+  labels:
+    app: usher-api
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - usher-api
+          - usher-demo-reset
+  policyTypes:
+    - Egress
+  egress:
+    # DNS.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Shared Postgres.
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: databases
+      ports:
+        - protocol: TCP
+          port: 5432

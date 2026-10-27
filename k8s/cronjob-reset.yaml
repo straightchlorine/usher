@@ -1,0 +1,85 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: usher-demo-reset
+  namespace: usher
+  labels:
+    app: usher-demo-reset
+spec:
+  # After the 03:00 Postgres backup.
+  schedule: "0 4 * * *"
+  timeZone: UTC
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: usher-demo-reset
+    spec:
+      activeDeadlineSeconds: 900
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app: usher-demo-reset
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            fsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: reset
+              image: ghcr.io/straightchlorine/usher/api:latest
+              imagePullPolicy: IfNotPresent
+              # Wipes demo data, re-seeds, exits 0.
+              args: ["--reset-demo"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: usher-api
+                      key: DATABASE_URL
+                - name: JWT_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: usher-api
+                      key: JWT_SECRET
+                - name: ROOT_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: usher-api
+                      key: ROOT_PASSWORD
+                - name: PROXY_SHARED_SECRET
+                  valueFrom:
+                    secretKeyRef:
+                      name: usher-api
+                      key: PROXY_SHARED_SECRET
+                - name: ROOT_NAME
+                  value: root
+                - name: DEMO_USERNAME
+                  value: demo
+                - name: DEMO_PASSWORD
+                  value: matchday
+                - name: TOKEN_VALID_HOURS
+                  value: "24"
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 250m
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop:
+                    - ALL

@@ -1,0 +1,120 @@
+site_name: Usher
+site_description: "Football ticket reservation system: a Go REST API, PostgreSQL and a React app behind a Cloudflare Worker, run on k3s with Argo CD"
+site_author: Piotr Krzysztof Lis, Jakub Kucharski
+site_url: https://docs.usher.piotrkrzysztof.dev
+
+repo_name: straightchlorine/usher
+repo_url: https://github.com/straightchlorine/usher
+edit_uri: edit/master/website/
+
+copyright: Copyright &copy; 2026 <a href="https://piotrkrzysztof.dev">Piotr Krzysztof Lis</a>
+
+docs_dir: website
+
+theme:
+  name: material
+  custom_dir: overrides
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+    - content.action.edit
+    - content.action.view
+
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+
+  logo: assets/favicon.svg
+  favicon: assets/favicon.svg
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+plugins:
+  - search:
+      lang: en
+  - privacy:
+      assets_exclude:
+        - img.shields.io/*
+  - git-revision-date-localized:
+      enable_creation_date: true
+      enable_git_follow: false
+      type: timeago
+      fallback_to_build_date: true
+
+exclude_docs: |
+  requirements.txt
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  social:
+    - icon: fontawesome/solid/globe
+      link: https://piotrkrzysztof.dev
+      name: piotrkrzysztof.dev
+    - icon: fontawesome/brands/github
+      link: https://github.com/straightchlorine/usher
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/u/straightchlorine
+      name: Docker Hub
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - Architecture: architecture.md
+  - API: api.md
+  - Images: images.md
+  - About: about.md

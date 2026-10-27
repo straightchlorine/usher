@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: usher-api
+  namespace: usher
+  labels:
+    app: usher-api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: usher-api
+  template:
+    metadata:
+      labels:
+        app: usher-api
+    spec:
+      # No preStop sleep (distroless, no shell): the Go server drains on SIGTERM.
+      terminationGracePeriodSeconds: 20
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: usher-api
+          image: ghcr.io/straightchlorine/usher/api:latest
+          imagePullPolicy: IfNotPresent
+          # Idempotent: ensures admin/demo users, seeds demo data only into an empty DB.
+          args: ["--populate"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: usher-api
+                  key: DATABASE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: usher-api
+                  key: JWT_SECRET
+            - name: ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: usher-api
+                  key: ROOT_PASSWORD
+            - name: PROXY_SHARED_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: usher-api
+                  key: PROXY_SHARED_SECRET
+            - name: ROOT_NAME
+              value: root
+            - name: DEMO_USERNAME
+              value: demo
+            - name: DEMO_PASSWORD
+              value: matchday
+            - name: TOKEN_VALID_HOURS
+              value: "24"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 2
+          # TCP only: a DB blip must not restart the pod; readiness covers it.
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usher-api
+  namespace: usher
+  labels:
+    app: usher-api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: usher-api

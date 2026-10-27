@@ -1,6 +1,13 @@
 .git
+.github
+.impeccable
+.claude
 .env
-.example_env
-event-reservation-frontend
+.env.example
+frontend
 docs
 *.md
+hoppscotch.json
+docker-compose.yml
+justfile
+**/node_modules

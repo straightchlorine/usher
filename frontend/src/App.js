@@ -1,72 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import EventList from './components/EventList';
-import Login from './components/Login';
-import Register from './components/Register';
-import Profile from './components/Profile'; 
-import TicketForm from './components/TicketForm'; 
-import './styles/NavBar.css';
-import './styles/Profile.css';
+import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider, RequireAdmin, RequireAuth } from './auth/AuthContext';
+import AppShell from './components/AppShell';
+import FixturesPage from './pages/FixturesPage';
+import MyTicketsPage from './pages/MyTicketsPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AdminPage from './pages/AdminPage';
+import HelpPage from './pages/HelpPage';
+import AboutPage from './pages/AboutPage';
+import NotFoundPage from './pages/NotFoundPage';
 
-const App = () => {
-  const [username, setUsername] = useState(null);
-
-  useEffect(() => {
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    setUsername(null);
-  };
-
+export default function App() {
   return (
-    <Router>
-      {/* Przycisk Logout oraz Profile w prawym górnym rogu */}
-      <div className="logout-container">
-        {username && (
-          <>
-            <span className="username-display">Welcome, {username}!</span>
-            <button className="logout-button" onClick={handleLogout}>
-              Logout
-            </button>
-            <Link to="/profile" className="profile-button">
-              Profile
-            </Link>
-          </>
-        )}
-      </div>
-
-      {/* Nawigacja */}
-      <div className="nav-container">
-        <div className="nav-buttons">
-          {!username && (
-            <>
-              <Link to="/login" className="nav-button">Login</Link>
-              <Link to="/register" className="nav-button">Register</Link>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Przycisk Events na środku */}
-      <div className="center-button">
-        <Link to="/" className="center-nav-button">Events</Link>
-      </div>
-
-      <Routes>
-        <Route path="/" element={<EventList />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/profile" element={<Profile />} /> {/* Nowa ścieżka */}
-        <Route path="/buy-ticket" element={<TicketForm />} /> {/* Trasa do TicketForm */}
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route path="/" element={<FixturesPage />} />
+            <Route
+              path="/tickets"
+              element={
+                <RequireAuth>
+                  <MyTicketsPage />
+                </RequireAuth>
+              }
+            />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/admin/*"
+              element={
+                <RequireAdmin>
+                  <AdminPage />
+                </RequireAdmin>
+              }
+            />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
-};
-
-export default App;
+}
