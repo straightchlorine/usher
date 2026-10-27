@@ -1,134 +1,75 @@
-import axios from "axios";
+import axios from 'axios';
+
+export const TOKEN_KEY = 'usher.token';
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:8080/api",
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
 });
 
-export const login = async (credentials) => {
+API.interceptors.request.use((config) => {
   try {
-    const response = await API.post('/login', credentials);
-    return response.data;
-  } catch (error) {
-    console.error('Login error:', error.response?.data || error.message);
-    throw error.response?.data || error;
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // storage unavailable: proceed unauthenticated
   }
-};
+  return config;
+});
 
-
-export const logout = async () => {
-  const response = await API.post("/logout");
-  return response.data;
-};
-
-export const getEvents = async () => {
-  console.log(API.baseURL);
-  const response = await API.get("/events");
-  return response.data.events;
-};
-
-export const getEventById = async (id) => {
-  const response = await API.get(`/events/${id}`);
-  return response.data;
-};
-
-export const createEvent = async (eventData) => {
-  const response = await API.put("/events", eventData);
-  return response.data;
-};
-
-export const updateEvent = async (id, eventData) => {
-  const response = await API.put(`/events/${id}`, eventData);
-  return response.data;
-};
-
-export const deleteEvent = async (id) => {
-  const response = await API.delete(`/events/${id}`);
-  return response.data;
-};
-
-export const getReservations = async () => {
-  const response = await API.get("/reservations");
-  return response.data.reservations;
-};
-
-export const getReservationById = async (id) => {
-  const response = await API.get(`/reservations/${id}`);
-  return response.data;
-};
-
-export const createReservation = async (reservationData, token) => {
-  const response = await API.put("/reservations", reservationData, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const cancelReservation = async (id) => {
-  const response = await API.post(`/reservations/${id}/cancel`);
-  return response.data;
-};
-
-export const getLocations = async () => {
-  const response = await API.get("/locations");
-  return response.data.locations;
-};
-
-export const createLocation = async (locationData) => {
-  const response = await API.put("/locations", locationData);
-  return response.data;
-};
-
-export const updateLocation = async (id, locationData) => {
-  const response = await API.put(`/locations/${id}`, locationData);
-  return response.data;
-};
-
-export const deleteLocation = async (id) => {
-  const response = await API.delete(`/locations/${id}`);
-  return response.data;
-};
-
-export const getUsers = async () => {
-  const response = await API.get("/users");
-  return response.data.users;
-};
-
-export const getUserById = async (id) => {
-  const response = await API.get(`/users/${id}`);
-  return response.data;
-};
-
-export const createUser = async (userData) => {
-  const response = await API.put("/users", userData);
-  return response.data;
-};
-
-export const updateUser = async (id, userData) => {
-  const response = await API.put(`/users/${id}`, userData);
-  return response.data;
-};
-
-export const deleteUser = async (id) => {
-  const response = await API.delete(`/users/${id}`);
-  return response.data;
-};
-
-export const getReservationsByUser = async (userId, token) => {
-  const response = await API.get(`/reservations/user/${userId}/tickets`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return response.data;
-};
-
-export const createTicket = async (eventId, ticketType, token) => {
-  const response = await API.post(
-    `/tickets`,
-    { eventId, ticketType },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      window.dispatchEvent(new Event('usher:unauthorized'));
     }
+    return Promise.reject(error);
+  }
+);
+
+export function errorMessage(err, fallback) {
+  const data = err?.response?.data;
+  if (data && typeof data === 'object') {
+    if (typeof data.message === 'string' && data.message) return data.message;
+    if (typeof data.error === 'string' && data.error) return data.error;
+  }
+  return fallback;
+}
+
+const data = (promise) => promise.then((r) => r.data);
+
+export const login = ({ username, password }) => data(API.post('/login', { username, password }));
+export const logout = () => data(API.post('/logout'));
+export const register = ({ name, surname, username, email, password }) =>
+  data(API.post('/register', { name, surname, username, email, password }));
+
+export const getEvents = () => data(API.get('/events')).then((d) => d.events || []);
+export const getEvent = (id) => data(API.get(`/events/${id}`));
+export const createEvent = (payload) => data(API.put('/events', payload));
+export const updateEvent = (id, payload) => data(API.put(`/events/${id}`, payload));
+export const deleteEvent = (id) => data(API.delete(`/events/${id}`));
+
+export const getLocations = () => data(API.get('/locations')).then((d) => d.locations || []);
+export const createLocation = (payload) => data(API.put('/locations', payload));
+export const updateLocation = (id, payload) => data(API.put(`/locations/${id}`, payload));
+export const deleteLocation = (id) => data(API.delete(`/locations/${id}`));
+
+export const createReservation = (eventId, ticketTypes) =>
+  data(
+    API.put('/reservations', {
+      event_id: eventId,
+      tickets: ticketTypes.map((type) => ({ type })),
+    })
   );
-  return response.data;
-};
+
+export const getMyReservations = () =>
+  data(API.get('/reservations/user'))
+    .then((d) => (Array.isArray(d) ? d : d?.reservations || []))
+    .catch((err) => {
+      if (err.response?.status === 404) return [];
+      throw err;
+    });
+
+export const getAllReservations = () =>
+  data(API.get('/reservations')).then((d) => (Array.isArray(d) ? d : d?.reservations || []));
+export const cancelReservation = (id) => data(API.post(`/reservations/${id}/cancel`));
+export const deleteReservation = (id) => data(API.delete(`/reservations/${id}`));

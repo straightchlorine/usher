@@ -1,0 +1,214 @@
+.tickets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.tickets__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.tickets__count {
+  color: var(--muted);
+  font-size: var(--text-16);
+}
+
+.tickets__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tickets__h2 {
+  font-size: var(--text-20);
+  font-weight: 800;
+}
+
+.tickets__none {
+  color: var(--muted);
+  font-size: var(--text-15);
+}
+
+.tickets__list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.res-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.res-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-13);
+  font-weight: 700;
+}
+
+.res-card__date {
+  color: var(--ink);
+  font-size: var(--text-13);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.res-card__venue {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.res-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.res-card__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-15);
+}
+
+.res-card__line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.res-card__line--total {
+  margin-top: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-16);
+  font-weight: 800;
+}
+
+.res-card__stub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--border);
+}
+
+.res-card__ref {
+  display: grid;
+  gap: 2px;
+}
+
+.res-card__ref-label,
+.res-card__booked {
+  color: var(--muted);
+  font-size: var(--text-13);
+}
+
+.res-card__ref-value {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+.res-card__footer {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.res-card__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.res-card__confirm-text {
+  font-size: var(--text-15);
+  font-weight: 700;
+}
+
+.res-card__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.res-card__error {
+  color: var(--danger);
+  font-size: var(--text-14);
+  font-weight: 500;
+}
+
+.tickets__skeletons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: var(--space-4);
+}
+
+.res-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+.res-skeleton__bar {
+  height: 16px;
+  border-radius: 8px;
+  background: var(--border);
+}
+
+.res-skeleton__bar--short {
+  width: 40%;
+}
+
+.res-skeleton__bar--tall {
+  height: 56px;
+}
+
+@media (min-width: 900px) {
+  .tickets__list,
+  .tickets__skeletons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .res-card {
+    padding: var(--space-4);
+  }
+
+  .res-card__confirm-actions .btn {
+    flex: 1 1 100%;
+  }
+}
+
+.tickets__more {
+  align-self: flex-start;
+  margin-top: var(--space-3);
+}
