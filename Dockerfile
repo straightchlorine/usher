@@ -1,5 +1,5 @@
-# --- Build stage ---
-FROM golang:1.26-alpine AS build
+# --- build ---
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine@sha256:27f2d3b83cfc5803c8078f8e730af0f7c431bf067afaec8f60a36fb763187cba AS build
 
 # set working dir
 WORKDIR /src
@@ -8,18 +8,18 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-# copy the rest of the application and build
+# copy the rest of the application and cross-compile for the target
 COPY . .
-RUN CGO_ENABLED=0 go build -trimpath -o /usher .
+ARG TARGETOS TARGETARCH
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/usher .
 
-# --- Runtime stage ---
-FROM alpine:3.22
+# --- runtime ---
+FROM gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab
 
-# user for the runtime
-RUN adduser -D -u 10001 usher
-USER usher
-COPY --from=build /usher /usr/local/bin/usher
+COPY --from=build /out/usher /usr/local/bin/usher
+USER nonroot:nonroot
 
-# expose the port and run
+# expose the port and run (no seeding unless started with --populate)
 EXPOSE 8080
-CMD ["usher", "--populate"]
+ENTRYPOINT ["/usr/local/bin/usher"]

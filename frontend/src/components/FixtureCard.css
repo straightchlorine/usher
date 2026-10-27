@@ -1,0 +1,151 @@
+.fixture-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.15s var(--ease-out);
+}
+
+.fixture-card:not(.fixture-card--out):hover {
+  border-color: var(--ink);
+}
+
+.fixture-card:has(:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.fixture-card--selected {
+  outline: 3px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.fixture-card--selected:has(:focus-visible) {
+  outline-color: var(--focus);
+  outline-offset: 2px;
+}
+
+.fixture-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.fixture-card__date {
+  font-size: var(--text-13);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.fixture-card__venue {
+  min-width: 0;
+  font-size: var(--text-14);
+  color: var(--muted);
+  text-align: right;
+}
+
+.fixture-card__foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+/* Two-line name row so price row and button align across a grid row. */
+.fixture-card .matchup__club {
+  min-height: 2.5em;
+}
+
+.fixture-card .monogram {
+  white-space: nowrap;
+}
+
+.fixture-card__price {
+  margin: 0;
+  font-size: var(--text-15);
+  font-weight: 700;
+}
+
+.fixture-card__stock {
+  flex: none;
+  font-size: var(--text-13);
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.fixture-card--out .fixture-card__match {
+  opacity: 0.7;
+}
+
+.fixture-card__stock--low {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.fixture-card__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.fixture-card__action {
+  display: flex;
+  margin-top: auto;
+}
+
+.fixture-card__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-15);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.fixture-card__btn:focus,
+.fixture-card__btn:focus-visible {
+  outline: none;
+}
+
+.fixture-card__btn--selected {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+}
+
+.fixture-card__btn--out {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* Stretched button: the pseudo-element makes the whole card clickable. */
+.fixture-card__btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-card);
+}

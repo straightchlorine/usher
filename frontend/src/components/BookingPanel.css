@@ -1,0 +1,394 @@
+.booking {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.booking__stripe {
+  height: 6px;
+  background: var(--stripe);
+}
+
+.booking__inner {
+  padding: var(--space-5);
+}
+
+.booking__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: booking-fade 0.28s var(--ease-out);
+}
+
+.booking__title {
+  font-size: var(--text-20);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.booking__title:focus {
+  outline: none;
+}
+
+.booking__help {
+  align-self: flex-start;
+  font-size: var(--text-14);
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.booking__title:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.booking__prompt {
+  font-size: var(--text-15);
+}
+
+.booking__note {
+  font-size: var(--text-14);
+  color: var(--muted);
+}
+
+.booking__fixture {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.booking__when {
+  font-size: var(--text-13);
+  color: var(--muted);
+}
+
+.booking__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.booking__line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border);
+}
+
+.booking__line-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.booking__line-name {
+  font-size: var(--text-15);
+  font-weight: 700;
+}
+
+.booking__line-note {
+  font-size: var(--text-13);
+  color: var(--muted);
+}
+
+.booking__unit {
+  font-size: var(--text-15);
+  font-weight: 500;
+}
+
+.booking__stepper {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--card);
+}
+
+.booking__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--ink);
+  font-size: var(--text-20);
+  line-height: 1;
+}
+
+.booking__step:hover:not(:disabled):not([aria-disabled='true']) {
+  background: var(--ground);
+}
+
+.booking__step:disabled,
+.booking__step[aria-disabled='true'] {
+  color: var(--muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.booking__qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  line-height: 1;
+  min-width: 28px;
+  text-align: center;
+  font-size: var(--text-16);
+  font-weight: 800;
+}
+
+.booking__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.booking__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.booking__count {
+  font-size: var(--text-15);
+  font-weight: 700;
+}
+
+.booking__amount {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.booking__left {
+  margin-top: -6px;
+  font-size: var(--text-14);
+  color: var(--muted);
+}
+
+.booking__error {
+  font-size: var(--text-14);
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.booking__demo {
+  font-size: var(--text-13);
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.booking__signin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--ground);
+  border-radius: var(--radius-control);
+}
+
+.booking__signin-title {
+  font-size: var(--text-16);
+  font-weight: 800;
+}
+
+.booking__signin-body {
+  font-size: var(--text-14);
+}
+
+.booking__signin-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--text-15);
+  font-weight: 700;
+}
+
+.booking__signin-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.booking__ref {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px var(--space-4);
+  background: var(--ground);
+  border-radius: var(--radius-control);
+}
+
+.booking__ref-label {
+  font-size: var(--text-13);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.booking__ref-code {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.booking__receipt {
+  font-size: var(--text-15);
+}
+
+/* Phone sheet */
+.booking-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.booking-sheet__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 23, 20, 0.55);
+}
+
+.booking-sheet__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-inline: auto;
+  max-height: 92vh;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  animation: booking-slide 0.38s var(--ease-out);
+}
+
+.booking-sheet__panel:focus {
+  outline: none;
+}
+
+.booking-sheet__panel:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+
+.booking-sheet__panel .booking {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.booking-sheet__panel .booking {
+  overflow: visible;
+}
+
+.booking-sheet__panel .booking__inner {
+  padding: 0 var(--space-4);
+}
+
+/* Steppers scroll above; count, total, Reserve and the demo line stay in reach. */
+.booking-sheet__panel .booking__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  gap: var(--space-3);
+  margin: 0 calc(-1 * var(--space-4));
+  padding: 0 var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--card);
+}
+
+.booking-sheet__panel .booking__total {
+  padding-top: var(--space-3);
+}
+
+.booking-sheet__panel .booking__amount {
+  font-size: 32px;
+}
+
+.booking-sheet__panel .booking__left {
+  margin-top: -4px;
+}
+
+/* Heading row and close stay pinned so close never scrolls away. */
+.booking-sheet__panel .booking__title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: var(--space-4) 68px var(--space-3) var(--space-4);
+  background: var(--card);
+}
+
+.booking-sheet__bar {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 0;
+}
+
+/* From 640px the sheet is a floating dialog: header and footer pinned, middle scrolls. */
+@media (min-width: 640px) {
+  .booking-sheet__panel {
+    max-width: 560px;
+    max-height: calc(100vh - 48px);
+    max-height: calc(100dvh - 48px);
+    bottom: 24px;
+    border-radius: var(--radius-card);
+  }
+
+  .booking-sheet__panel .booking__foot {
+    padding-bottom: var(--space-3);
+  }
+}
+
+.booking-sheet__close {
+  position: absolute;
+  top: 14px;
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--ink);
+}
+
+@keyframes booking-slide {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes booking-fade {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .booking__stack,
+  .booking-sheet__panel {
+    animation: none;
+  }
+}
