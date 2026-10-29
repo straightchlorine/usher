@@ -19,7 +19,7 @@ spec:
         app: usher-demo-reset
     spec:
       activeDeadlineSeconds: 900
-      backoffLimit: 1
+      backoffLimit: 4
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
