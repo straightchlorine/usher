@@ -2,8 +2,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { Navigate, useLocation } from 'react-router-dom';
 import * as api from '../api';
 
-const DEMO_USERNAME = process.env.REACT_APP_DEMO_USERNAME || 'demo';
-const DEMO_PASSWORD = process.env.REACT_APP_DEMO_PASSWORD || 'matchday';
+const DEMO_USERNAME = import.meta.env.VITE_DEMO_USERNAME || 'demo';
+const DEMO_PASSWORD = import.meta.env.VITE_DEMO_PASSWORD || 'matchday';
 
 const AuthContext = createContext(null);
 

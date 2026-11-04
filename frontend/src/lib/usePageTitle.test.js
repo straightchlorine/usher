@@ -1,4 +1,3 @@
-/* eslint-disable testing-library/no-unnecessary-act -- plain react-dom, no RTL installed */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { act } from 'react';

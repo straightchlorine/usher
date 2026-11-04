@@ -2,27 +2,20 @@
   "name": "usher-web",
   "version": "1.0.1",
   "private": true,
+  "type": "module",
   "dependencies": {
     "@fontsource-variable/hanken-grotesk": "^5.3.0",
     "axios": "^1.20.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "react-router-dom": "^7.18.4",
-    "react-scripts": "5.0.1"
+    "react-router-dom": "^7.18.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest run",
     "worker:test": "node --test worker/*.test.mjs",
     "worker:dev": "wrangler dev"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -37,6 +30,21 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@vitejs/plugin-react": "6.2.1",
+    "eslint": "10.14.0",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.14.0",
+    "jsdom": "30.1.3",
+    "vite": "8.3.5",
+    "vitest": "5.1.0",
     "wrangler": "4.153.0"
+  },
+  "overrides": {
+    "eslint-plugin-react": {
+      "eslint": "$eslint"
+    },
+    "minimatch": "11.0.4"
   }
 }
