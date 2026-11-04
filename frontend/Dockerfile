@@ -9,14 +9,10 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 
-# REACT_APP_* is baked into the bundle at build time, not read at runtime;
-# the api sits behind the nginx reverse proxy, so the url stays relative
-ARG REACT_APP_API_URL=/api
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
-
-# keep all js in files so the CSP can use script-src 'self'; no source maps
-ENV INLINE_RUNTIME_CHUNK=false
-ENV GENERATE_SOURCEMAP=false
+# VITE_* baked into the bundle at build time, not read at runtime;
+# since api is behind nginx reverse proxy - url stays relative
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
 
 # build
 RUN npm run build

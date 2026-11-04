@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_PASSWORD: pw
           POSTGRES_DB: event_api
@@ -75,12 +75,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npx eslint src --max-warnings 0
-      - run: npx react-scripts test --watchAll=false
-        env:
-          CI: "true"
+      - run: npm test
       - run: npm run build
-        env:
-          CI: "true"
       - run: npm run worker:test
       - name: Worker dry run
         run: npx wrangler deploy --dry-run --outdir "$RUNNER_TEMP/worker"
