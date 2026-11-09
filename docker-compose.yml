@@ -26,7 +26,7 @@ services:
       retries: 5
 
   nocodb:
-    image: nocodb/nocodb:2026.10.0
+    image: nocodb/nocodb:2026.10.1
     restart: always
     networks:
       - usher-network
@@ -66,7 +66,7 @@ services:
         restart: true
 
   swagger:
-    image: swaggerapi/swagger-ui:v5.34.0
+    image: swaggerapi/swagger-ui:v5.34.1
     networks:
       - usher-network
     ports:
