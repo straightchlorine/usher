@@ -20,6 +20,11 @@ RUN npm run build
 # --- runtime (nginx) ---
 FROM nginxinc/nginx-unprivileged:stable-alpine-slim@sha256:5d8bb9437d74a600ec5dbf90c035451c724dc33eac8d3a71078f6f8612c345f6
 
+# TODO: drop once rebuilt digest ships them (musl CVE-2026-107891, zlib CVE-2026-85091)
+USER root
+RUN apk upgrade --no-cache
+USER 101
+
 # the build, and the config rendered by the entrypoint (envsubst) at start
 COPY --from=build /app/build /usr/share/nginx/html
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template

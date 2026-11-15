@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender-seo.mjs",
     "test": "vitest run",
     "worker:test": "node --test worker/*.test.mjs",
     "worker:dev": "wrangler dev"
