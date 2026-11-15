@@ -28,7 +28,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    location /static/ {
+    location /assets/ {
         add_header Cache-Control "public, max-age=31536000, immutable";
         include /etc/nginx/snippets/security-headers.conf;
         try_files $uri =404;
