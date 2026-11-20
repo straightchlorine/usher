@@ -22,7 +22,10 @@ FROM nginxinc/nginx-unprivileged:stable-alpine-slim@sha256:5d8bb9437d74a600ec5db
 
 # TODO: drop once rebuilt digest ships them (musl CVE-2026-107891, zlib CVE-2026-85091)
 USER root
-RUN apk upgrade --no-cache
+
+# The base image pins nginx=<version> in /etc/apk/world, so an `apk upgrade` doesn't
+# change nginx; `apk add nginx` drops the pin.
+RUN apk add --no-cache --upgrade nginx && apk upgrade --no-cache
 USER 101
 
 # the build, and the config rendered by the entrypoint (envsubst) at start
