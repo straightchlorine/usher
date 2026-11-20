@@ -61,9 +61,9 @@ try {
     if (html.includes('noindex')) throw new Error(`prerender: ${file} contains noindex`);
 
     writeFileSync(`build/${file}`, html);
-    const text = html.match(/<body[\s\S]*<\/body>/)[0]
-      .replace(/<script[\s\S]*?<\/script>|<noscript[\s\S]*?<\/noscript>/g, '').replace(/<[^>]+>/g, ' ');
-    const words = text.split(/\s+/).filter(Boolean).length;
+    // Word count only (log line): text nodes of <main>, nothing is sanitized.
+    const main = html.match(/<main>[\s\S]*?<\/main>/)[0];
+    const words = [...main.matchAll(/>([^<]+)</g)].flatMap((m) => m[1].split(/\s+/).filter(Boolean)).length;
     console.log(`prerender: ${p.path} -> build/${file} ${Buffer.byteLength(html)} bytes, title ${p.title.length} chars, ${words} words`);
   }
 } finally {
