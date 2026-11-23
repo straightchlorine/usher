@@ -66,7 +66,7 @@ services:
         restart: true
 
   swagger:
-    image: swaggerapi/swagger-ui:v5.34.1
+    image: swaggerapi/swagger-ui:v5.35.0
     networks:
       - usher-network
     ports:
